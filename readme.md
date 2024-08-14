@@ -45,6 +45,25 @@ stdenv.mkDerivation rec {
 }
 ```
 
+## Use the `nvfetcherSource` attribute
+
+`nvfetcherSource` attribute is an nix setup hook that will obtain nvfetcher generated sources
+and place them under `dependencies` directory in build root.
+
+Read [nvfetcher](https://github.com/berberman/nvfetcher) document for nvfetcher usage.
+By default the `nvfetcherSource` attribute will read `nix/pkgs/_sources/generated.nix`,
+so developer should place nvfetcher config and run `nix run .#nvfetcher` under `nix/pkgs`.
+
+Usage:
+
+```nix
+stdenv.mkDerivation {
+    nativeBuildInputs = [
+        nvfetcherSource.setupHook
+    ]
+}
+```
+
 ## Exposed overridable attrs
 
 ### espresso

@@ -39,4 +39,6 @@ final: prev:
       runHook postInstall
     '';
   };
+
+  nvfetcherSource = final.callPackage ./pkgs/nvfetcher-source.nix { };
 }
