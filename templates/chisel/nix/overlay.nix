@@ -16,5 +16,16 @@ final: prev:
     # riscv-test-env = ./path/to/riscv-test-env;
   };
 
-  nvfetcherSource = final.callPackage ./pkgs/nvfetcher-source.nix { };
+  # Using VCS need to set VC_STATIC_HOME and SNPSLMD_LICENSE_FILE to impure env, and add sandbox dir to VC_STATIC_HOME
+  # Remember to add "--impure" flag for nix to read this value from environment
+  vcStaticHome = builtins.getEnv "VC_STATIC_HOME";
+  snpslmdLicenseFile = builtins.getEnv "SNPSLMD_LICENSE_FILE";
+  vcs-fhs-env = assert final.lib.assertMsg (final.vcStaticHome != "") "You forget to set VC_STATIC_HOME or the '--impure' flag";
+    assert final.lib.assertMsg (final.snpslmdLicenseFile != "") "You forget to set SNPSLMD_LICENSE_FILE or the '--impure' flag";
+    final.callPackage ./pkgs/vcs-fhs-env.nix { };
+
+  projectDependencies = final.callPackage ./pkgs/project-dependencies.nix { };
+
+  # Feel free to change 'chisel' with custom project name
+  chisel = final.callPackage ./chisel { };
 }

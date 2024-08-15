@@ -1,4 +1,4 @@
-{ pkgs, makeSetupHook, writeText, lib, generatedNixPath ? ./_sources/generated.nix }:
+{ pkgs, makeSetupHook, writeText, lib, generatedNixPath ? ./dependencies/_sources/generated.nix }:
 
 let
   submodules = lib.filterAttrs (_: v: v ? src) (pkgs.callPackage generatedNixPath { });
