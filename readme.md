@@ -1,3 +1,14 @@
+# chisel nix
+
+## Usage
+
+```bash
+mkdir my-shining-new-chip
+cd my-shining-new-chip
+git init
+nix flake init -t github:chipsalliance/chisel-nix#chisel
+```
+
 ## General notes
 
 - To obtain new source code hash, developers can replace old hash with empty string, and let nix figure out the new hash.
@@ -35,7 +46,7 @@ stdenv.mkDerivation rec {
           ./build.sc
         ];
       };
-      millDepsHash = "sha256-DQeKTqf+MES5ubORu+SMJEiqpOCXsS7VgxUnSqG12Bs=";
+      millDepsHash = "sha256-AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=";
     };
     # ...
     nativeBuildInputs = [
@@ -47,19 +58,19 @@ stdenv.mkDerivation rec {
 
 ## Use the `nvfetcherSource` attribute
 
-`nvfetcherSource` attribute is an nix setup hook that will obtain nvfetcher generated sources
+`projectDependencies` attribute is an nix setup hook that will obtain nvfetcher generated sources
 and place them under `dependencies` directory in build root.
 
 Read [nvfetcher](https://github.com/berberman/nvfetcher) document for nvfetcher usage.
-By default the `nvfetcherSource` attribute will read `nix/pkgs/_sources/generated.nix`,
-so developer should place nvfetcher config and run `nix run .#nvfetcher` under `nix/pkgs`.
+By default the `nvfetcherSource` attribute will read `nix/pkgs/dependencies/_sources/generated.nix`,
+so developer should place nvfetcher config and run `nix run .#nvfetcher` under `nix/pkgs/dependencies`.
 
 Usage:
 
 ```nix
 stdenv.mkDerivation {
     nativeBuildInputs = [
-        nvfetcherSource.setupHook
+        projectDependencies.setupHook
     ]
 }
 ```
