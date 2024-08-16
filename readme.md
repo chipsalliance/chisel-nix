@@ -1,6 +1,6 @@
 # chisel nix
 
-## Usage
+Here we provide nix templates for setting up a Chisel project.
 
 ```bash
 mkdir my-shining-new-chip
@@ -9,12 +9,60 @@ git init
 nix flake init -t github:chipsalliance/chisel-nix#chisel
 ```
 
-## General notes
+Use the above commands to setup a chisel project skeleton.
+It will provide you the below code structure:
 
-- To obtain new source code hash, developers can replace old hash with empty string, and let nix figure out the new hash.
-- If there are some attribute not exposed in override function, developers can still using the overrideAttrs function.
+* elaborator/: source code to the chisel elaborator
+* gcd/: source code for the [GCD](https://en.wikipedia.org/wiki/Greatest_common_divisor) example
+* nix/: nix build script for the whole lowering process
+* build.sc & common.sc: Scala build script
+* flake.nix: the root for nix to search scripts
 
-## Use the fetchMillDeps function
+Our packaging strategy is using the `overlay.nix` to "overlay" the nixpkgs.
+Every thing that developers want to add or modify should go into the `overlay.nix` file.
+
+This skeleton provides a simple [GCD](https://en.wikipedia.org/wiki/Greatest_common_divisor) example.
+It's build script is in `nix/gcd` folder, providing the below attributes:
+
+* gcd-compiled: JVM bytecode for the GCD and elaborator
+* elaborator: a bash wrapper for running the elaborator with JDK
+* elaborate: Unlowered MLIR bytecode output from firrtl elaborated by elaborator
+* mlirbc: MLIR bytecode lowered by circt framework
+* rtl: system verilog generated from the lowered MLIR bytecode
+* verilated-c-lib: C library verilated from system verilog
+
+To get the corresponding output, developers can use:
+
+```bash
+nix build '.#gcd.<attr>'
+```
+
+For example, to get the final lowered system verilog, developer can run:
+
+```bash
+nix build '.#gcd.rtl'
+```
+
+The build result will be a symlink to nix store placed under the `./result`.
+
+To have same environment as the build script for developing purpose, developer can use:
+
+```bash
+nix develop '.#gcd.<attr>'
+```
+
+For example, to modify the GCD sources, developer can run:
+
+```bash
+nix develop '.#gcd.gcd-compiled'
+```
+
+The above command will provide a new bash shell with `mill`, `circt`, `chisel`... dependencies set up.
+
+## References
+
+
+### Use the fetchMillDeps function
 
 Fetch project dependencies for later offline usage.
 
@@ -56,7 +104,7 @@ stdenv.mkDerivation rec {
 }
 ```
 
-## Use the `nvfetcherSource` attribute
+### Use the `nvfetcherSource` attribute
 
 `projectDependencies` attribute is an nix setup hook that will obtain nvfetcher generated sources
 and place them under `dependencies` directory in build root.
@@ -72,20 +120,5 @@ stdenv.mkDerivation {
     nativeBuildInputs = [
         projectDependencies.setupHook
     ]
-}
-```
-
-## Exposed overridable attrs
-
-### espresso
-
-To override espresso, use the `override` method:
-
-```nix
-final: prev: {
-    myEspresso = prev.espresso.override {
-        version = "<version>";
-        srcHash = "<hash>";
-    };
 }
 ```
