@@ -4,11 +4,13 @@
 }:
 
 stdenvNoCC.mkDerivation {
-  name = "mlirbc";
+  name = "${elaborate.name}-mlirbc";
 
   nativeBuildInputs = [ circt ];
 
-  inherit (elaborate) passthru;
+  passthru = {
+    inherit elaborate;
+  };
 
   buildCommand = ''
     mkdir $out

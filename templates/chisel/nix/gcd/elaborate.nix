@@ -7,7 +7,7 @@
 }:
 
 stdenvNoCC.mkDerivation {
-  name = "elaborate";
+  name = "${elaborator.name}-elaborate";
 
   nativeBuildInputs = [ espresso circt ];
 
@@ -18,8 +18,7 @@ stdenvNoCC.mkDerivation {
   buildCommand = ''
     mkdir -p elaborate $out
 
-    ${elaborator}/bin/elaborator \
-        --target-dir elaborate
+    ${elaborator}/bin/elaborator --target-dir elaborate
 
     firtool elaborate/*.fir \
       --annotation-file elaborate/*.anno.json \

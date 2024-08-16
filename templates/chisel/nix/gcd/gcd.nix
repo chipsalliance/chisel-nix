@@ -16,15 +16,15 @@
 
 let
   self = stdenv.mkDerivation rec {
-    name = "<project-name>";
+    name = "gcd";
 
     src = with lib.fileset; toSource {
       root = ./../..;
       fileset = unions [
         ./../../build.sc
         ./../../common.sc
-        # Fill scala source here
-        ./../../project
+        ./../../gcd
+        ./../../elaborator
       ];
     };
 
@@ -37,7 +37,7 @@ let
           ./../../common.sc
         ];
       };
-      millDepsHash = "sha256-AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=";
+      millDepsHash = "sha256-ziXh1Pta9MQEzLzjtuppx1ll/57CdKADdSjCNdcIOGg=";
       nativeBuildInputs = [ projectDependencies.setupHook ];
     };
 
@@ -71,21 +71,18 @@ let
 
     buildPhase = ''
       mill -i '__.assembly'
-
-      mill -i t1package.sourceJar
-      mill -i t1package.chiselPluginJar
     '';
 
     installPhase = ''
       mkdir -p $out/share/java
 
-      add-determinism out/elaborator/assembly.dest/out.jar
+      add-determinism -j $NIX_BUILD_CORES out/elaborator/assembly.dest/out.jar
 
       mv out/elaborator/assembly.dest/out.jar $out/share/java/elaborator.jar
 
-      mkdir -p $configgen/bin $elaborator/bin
+      mkdir -p $elaborator/bin
       makeWrapper ${jdk21}/bin/java $elaborator/bin/elaborator \
-        --add-flags "--enable-preview -Djava.library.path=${circt-full}/lib -cp $out/share/java/elaborator.jar org.chipsalliance.#project#.elaborator.Main"
+        --add-flags "--enable-preview -Djava.library.path=${circt-full}/lib -jar $out/share/java/elaborator.jar"
     '';
   };
 in
