@@ -1,0 +1,6 @@
+.metals/
+.vscode/
+out/
+result*
+/dependencies/
+target/

@@ -1,1 +1,4 @@
 flake.lock
+.envrc
+.direnv/
+dependencies/
