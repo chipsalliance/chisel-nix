@@ -3,7 +3,9 @@
 ,
 }:
 lib.makeScope newScope (scope: {
-  elaborator = scope.callPackage ./elaborator.nix { };
+  gcd-compiled = scope.callPackage ./gcd.nix { };
+  inherit (scope.gcd-compiled) elaborator;
+
   elaborate = scope.callPackage ./elaborate.nix { };
   mlirbc = scope.callPackage ./mlirbc.nix { };
   rtl = scope.callPackage ./rtl.nix { };

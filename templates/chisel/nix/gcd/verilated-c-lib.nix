@@ -24,7 +24,7 @@ stdenv.mkDerivation {
       --timing \
       --threads 8 \
       -O1 \
-      --cc TestBench
+      --cc GCD
 
     echo "[nix] building verilated C lib"
 
@@ -32,9 +32,9 @@ stdenv.mkDerivation {
     mkdir -p $out/share
     cp -r obj_dir $out/share/verilated_src
 
-    # We can't use -C here because VTestBench.mk is generated with relative path
+    # We can't use -C here because VGCD.mk is generated with relative path
     cd obj_dir
-    make -j "$NIX_BUILD_CORES" -f VTestBench.mk libVTestBench
+    make -j "$NIX_BUILD_CORES" -f VGCD.mk libVGCD
 
     runHook postBuild
   '';

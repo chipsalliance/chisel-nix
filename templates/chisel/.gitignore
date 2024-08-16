@@ -1,3 +1,5 @@
+.bloop
 .metals/
 out/
 /result*
+/dependencies/
