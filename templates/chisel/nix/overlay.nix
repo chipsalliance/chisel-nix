@@ -26,6 +26,5 @@ final: prev:
 
   projectDependencies = final.callPackage ./pkgs/project-dependencies.nix { };
 
-  # Feel free to change 'chisel' with custom project name
-  chisel = final.callPackage ./chisel { };
+  gcd = final.callPackage ./gcd { };
 }
