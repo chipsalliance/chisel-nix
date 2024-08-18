@@ -1,3 +1,5 @@
+# TODO: pass dpi lib to here.
+#       maybe for the demo project, we can just use verilator -main to align the dependency w/ vcs?
 { lib
 , stdenv
 , rtl
@@ -12,16 +14,19 @@ stdenv.mkDerivation {
 
   nativeBuildInputs = [ verilator ];
 
-  # zlib is required for Rust to link against
+  # zlib is required for Rust to link against?
+  # IIRC: zlib is required for 
   propagatedBuildInputs = [ zlib ];
 
   buildPhase = ''
     runHook preBuild
 
     echo "[nix] running verilator"
+    # TODO: maybe leave these args to be passed from nix?
     verilator \
       ${lib.optionalString enable-trace "--trace-fst"} \
       --timing \
+      # TODO: pass threads as parameter or $NIX_BUILD_CORES
       --threads 8 \
       -O1 \
       --cc GCD
