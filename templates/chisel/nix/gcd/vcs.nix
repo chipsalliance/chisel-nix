@@ -34,7 +34,7 @@ stdenv.mkDerivation {
         -kdb=common_elab,hgldd_all''} \
       -file filelist.f \
       ${vcs-dpi-lib}/lib/libdpi.a \
-      -o t1-vcs-simulator
+      -o gcd-vcs-simulator
 
     runHook postBuild
   '';
@@ -53,17 +53,17 @@ stdenv.mkDerivation {
     runHook preInstall
 
     mkdir -p $out/bin $out/lib
-    cp t1-vcs-simulator $out/lib
-    cp -r t1-vcs-simulator.daidir $out/lib
+    cp gcd-vcs-simulator $out/lib
+    cp -r gcd-vcs-simulator.daidir $out/lib
 
     # We need to carefully handle string escape here, so don't use makeWrapper
-    tee $out/bin/t1-vcs-simulator <<EOF
+    tee $out/bin/gcd-vcs-simulator <<EOF
     #!${bash}/bin/bash
-    export LD_LIBRARY_PATH="$out/lib/t1-vcs-simulator.daidir:\$LD_LIBRARY_PATH"
+    export LD_LIBRARY_PATH="$out/lib/gcd-vcs-simulator.daidir:\$LD_LIBRARY_PATH"
     _argv="\$@"
-    ${vcs-fhs-env}/bin/vcs-fhs-env -c "$out/lib/t1-vcs-simulator \$_argv"
+    ${vcs-fhs-env}/bin/vcs-fhs-env -c "$out/lib/gcd-vcs-simulator \$_argv"
     EOF
-    chmod +x $out/bin/t1-vcs-simulator
+    chmod +x $out/bin/gcd-vcs-simulator
 
     runHook postInstall
   '';

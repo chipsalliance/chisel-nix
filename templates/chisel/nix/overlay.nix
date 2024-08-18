@@ -9,13 +9,6 @@ final: prev:
   circt-full = final.callPackage ./pkgs/circt-full.nix { };
   add-determinism = final.callPackage ./pkgs/add-determinism { }; # faster strip-undetereminism
 
-  riscv-tests = final.callPackage ./pkgs/riscv-tests.nix {
-    stdenv = final.pkgsCross.riscv32-embedded.stdenv;
-
-    # Uncomment and replace this to other env
-    # riscv-test-env = ./path/to/riscv-test-env;
-  };
-
   # Using VCS need to set VC_STATIC_HOME and SNPSLMD_LICENSE_FILE to impure env, and add sandbox dir to VC_STATIC_HOME
   # Remember to add "--impure" flag for nix to read this value from environment
   vcStaticHome = builtins.getEnv "VC_STATIC_HOME";
