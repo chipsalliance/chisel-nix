@@ -3,11 +3,7 @@
 package org.chipsalliance.t1.elaborator
 
 import chisel3.RawModule
-import chisel3.experimental.{
-  SerializableModule,
-  SerializableModuleGenerator,
-  SerializableModuleParameter
-}
+import chisel3.experimental.{SerializableModule, SerializableModuleGenerator, SerializableModuleParameter}
 import mainargs.TokensReader
 
 import scala.reflect.runtime.universe
@@ -21,20 +17,21 @@ trait Elaborator {
   }
 
   def configImpl[P <: SerializableModuleParameter: universe.TypeTag](
-      parameter: P
-  )(implicit rwP: upickle.default.Writer[P]) = os.write.over(
+    parameter: P
+  )(
+    implicit rwP: upickle.default.Writer[P]
+  ) = os.write.over(
     os.pwd / s"${getClass.getSimpleName.replace("$", "")}.json",
     upickle.default.write(parameter)
   )
 
-  def designImpl[M <: SerializableModule[
-    P
-  ]: universe.TypeTag, P <: SerializableModuleParameter: universe.TypeTag](
-      parameter: os.Path,
-      runFirtool: Boolean,
-      targetDir: os.Path = os.pwd
-  )(implicit
-      rwP: upickle.default.Reader[P]
+  def designImpl[M <: SerializableModule[P]: universe.TypeTag, P <: SerializableModuleParameter: universe.TypeTag](
+    parameter:  os.Path,
+    runFirtool: Boolean,
+    targetDir:  os.Path = os.pwd
+  )(
+    implicit
+    rwP: upickle.default.Reader[P]
   ) = {
     var fir: firrtl.ir.Circuit = null
     val annos = Seq(
@@ -58,7 +55,7 @@ trait Elaborator {
           None
         case _: chisel3.stage.DesignAnnotation[_]     => None
         case _: chisel3.stage.ChiselCircuitAnnotation => None
-        case a                                        => Some(a)
+        case a => Some(a)
       }
     val annoJsonFile = targetDir / s"${fir.main}.anno.json"
     val firFile = targetDir / s"${fir.main}.fir"

@@ -53,8 +53,7 @@ trait Elaborator extends millbuild.common.ElaboratorModule {
 }
 
 object panamaconverter extends PanamaConverter
-trait PanamaConverter
-    extends millbuild.dependencies.chisel.build.PanamaConverter {
+trait PanamaConverter extends millbuild.dependencies.chisel.build.PanamaConverter {
   def crossValue = deps.scalaVer
 
   override def millSourcePath =

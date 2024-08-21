@@ -8,7 +8,7 @@ import chisel3.experimental.hierarchy.{instantiable, public, Instance, Instantia
 import chisel3.experimental.{SerializableModule, SerializableModuleParameter}
 import chisel3.ltl.Property.{eventually, not}
 import chisel3.ltl.{AssertProperty, CoverProperty, Delay, Sequence}
-import chisel3.probe.{Probe, ProbeValue, define}
+import chisel3.probe.{define, Probe, ProbeValue}
 import chisel3.properties.{AnyClassType, Class, Property}
 import chisel3.util.circt.dpi.RawUnclockedNonVoidFunctionCall
 import chisel3.util.{DecoupledIO, HasExtModuleInline, Valid}
@@ -19,8 +19,7 @@ object GCDParameter {
 }
 
 /** Parameter of [[GCD]] */
-case class GCDParameter(width: Int, useAsyncReset: Boolean)
-    extends SerializableModuleParameter
+case class GCDParameter(width: Int, useAsyncReset: Boolean) extends SerializableModuleParameter
 
 /** Verification IO of [[GCD]] */
 class GCDProbe(parameter: GCDParameter) extends Bundle {
@@ -63,8 +62,7 @@ class GCD(val parameter: GCDParameter)
   val y: UInt = Reg(chiselTypeOf(io.input.bits.x))
   val busy = y =/= 0.U
 
-  when(x > y) { x := x - y }
-    .otherwise { y := y - x }
+  when(x > y) { x := x - y }.otherwise { y := y - x }
 
   when(io.input.fire) {
     x := io.input.bits.x
@@ -92,11 +90,11 @@ object GCDTestBenchParameter {
 
 /** Parameter of [[GCD]]. */
 case class GCDTestBenchParameter(
-    testVerbatimParameter: TestVerbatimParameter,
-    gcdParameter: GCDParameter,
-    timeout: Int,
-    testSize: Int
-) extends SerializableModuleParameter {
+  testVerbatimParameter: TestVerbatimParameter,
+  gcdParameter:          GCDParameter,
+  timeout:               Int,
+  testSize:              Int)
+    extends SerializableModuleParameter {
   require(
     (testVerbatimParameter.useAsyncReset && gcdParameter.useAsyncReset) ||
       (!testVerbatimParameter.useAsyncReset && !gcdParameter.useAsyncReset),
@@ -201,27 +199,20 @@ object TestVerbatimParameter {
 }
 
 case class TestVerbatimParameter(
-    useAsyncReset: Boolean,
-    initFunctionName: String,
-    dumpFunctionName: String,
-    clockFlipTick: Int,
-    resetFlipTick: Int
-)
   useAsyncReset:    Boolean,
   initFunctionName: String,
   dumpFunctionName: String,
   clockFlipTick:    Int,
   resetFlipTick:    Int)
     extends SerializableModuleParameter
-    extends SerializableModuleParameter
 
 @instantiable
 class TestVerbatimOM(parameter: TestVerbatimParameter) extends Class {
-  val useAsyncReset: Property[Boolean] = IO(Output(Property[Boolean]()))
+  val useAsyncReset:    Property[Boolean] = IO(Output(Property[Boolean]()))
   val initFunctionName: Property[String] = IO(Output(Property[String]()))
   val dumpFunctionName: Property[String] = IO(Output(Property[String]()))
-  val clockFlipTick: Property[Int] = IO(Output(Property[Int]()))
-  val resetFlipTick: Property[Int] = IO(Output(Property[Int]()))
+  val clockFlipTick:    Property[Int] = IO(Output(Property[Int]()))
+  val resetFlipTick:    Property[Int] = IO(Output(Property[Int]()))
   val gcd = IO(Output(Property[AnyClassType]()))
   @public
   val gcdIn = IO(Input(Property[AnyClassType]()))
