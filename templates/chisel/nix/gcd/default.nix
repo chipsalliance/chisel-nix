@@ -1,9 +1,13 @@
 { lib, newScope, }:
 lib.makeScope newScope (scope: {
-  gcd-compiled = scope.callPackage ./gcd.nix { };
-  inherit (scope.gcd-compiled) elaborator;
+  design-target = "GCD";
+  tb-target = "GCDTestBench";
 
-  elaborate = scope.callPackage ./elaborate.nix { };
+  # RTL
+  gcd-compiled = scope.callPackage ./gcd.nix { target = scope.design-target; };
+  elaborate = scope.callPackage ./elaborate.nix {
+    elaborator = scope.gcd-compiled.elaborator;
+  };
   mlirbc = scope.callPackage ./mlirbc.nix { };
   rtl = scope.callPackage ./rtl.nix { };
 
@@ -22,5 +26,10 @@ lib.makeScope newScope (scope: {
   verilated-trace =
     scope.verilated.override { tb-dpi-lib = scope.tb-dpi-lib-trace; };
   vcs = scope.callPackage ./vcs.nix { };
+
+  # TODO: designConfig should be read from OM
+  tbConfig = with builtins;
+    fromJSON (readFile ./../../configs/${scope.tb-target}.json);
+
 })
 
