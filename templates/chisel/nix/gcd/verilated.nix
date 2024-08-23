@@ -1,12 +1,4 @@
-# TODO: pass dpi lib to here.
-#       maybe for the demo project, we can just use verilator -main to align the dependency w/ vcs?
-{ lib
-, stdenv
-, rtl
-, verilator
-, zlib
-, enable-trace ? false
-}:
+{ lib, stdenv, rtl, verilator, zlib, tb-dpi-lib, thread-num ? 8 }:
 stdenv.mkDerivation {
   name = "verilated";
 
@@ -22,14 +14,16 @@ stdenv.mkDerivation {
     runHook preBuild
 
     echo "[nix] running verilator"
+    echo `ls`
     # TODO: maybe leave these args to be passed from nix?
     verilator \
-      ${lib.optionalString enable-trace "--trace-fst"} \
+      ${lib.optionalString tb-dpi-lib.enable-trace "--trace-fst"} \
       --timing \
-      # TODO: pass threads as parameter or $NIX_BUILD_CORES
-      --threads 8 \
+      --threads ${toString thread-num} \
       -O1 \
-      --cc GCD
+      --main \
+      --exe \
+      --cc GCDTestBench ${tb-dpi-lib}/lib/libgcdemu.a
 
     echo "[nix] building verilated C lib"
 
@@ -37,23 +31,20 @@ stdenv.mkDerivation {
     mkdir -p $out/share
     cp -r obj_dir $out/share/verilated_src
 
-    # We can't use -C here because VGCD.mk is generated with relative path
+    # We can't use -C here because the Makefile is generated with relative path
     cd obj_dir
-    make -j "$NIX_BUILD_CORES" -f VGCD.mk libVGCD
+    make -j "$NIX_BUILD_CORES" -f VGCDTestBench.mk VGCDTestBench
 
     runHook postBuild
   '';
 
-  passthru = {
-    inherit enable-trace;
-  };
-
   installPhase = ''
     runHook preInstall
 
-    mkdir -p $out/include $out/lib
+    mkdir -p $out/{include,lib,bin}
     cp *.h $out/include
     cp *.a $out/lib
+    cp VGCDTestBench $out/bin
 
     runHook postInstall
   '';

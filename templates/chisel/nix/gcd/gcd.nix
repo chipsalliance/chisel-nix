@@ -12,6 +12,8 @@
 , add-determinism
 
 , projectDependencies
+
+, target
 }:
 
 let
@@ -47,6 +49,9 @@ let
         mill mill.bsp.BSP/install 0
       '';
     });
+    
+    passthru.elaborateTarget = target;
+
 
     shellHook = ''
       setupSubmodules
@@ -82,7 +87,7 @@ let
 
       mkdir -p $elaborator/bin
       makeWrapper ${jdk21}/bin/java $elaborator/bin/elaborator \
-        --add-flags "--enable-preview -Djava.library.path=${circt-full}/lib -jar $out/share/java/elaborator.jar"
+        --add-flags "--enable-preview -Djava.library.path=${circt-full}/lib -cp $out/share/java/elaborator.jar org.chipsalliance.t1.elaborator.rocketv.${target}"
     '';
   };
 in

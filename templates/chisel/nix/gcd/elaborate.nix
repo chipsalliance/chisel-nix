@@ -1,5 +1,6 @@
 # TODO: in the future, we may need to add circtbindng pass and set it by default.
-{ stdenvNoCC
+{ lib
+, stdenvNoCC
 
 , espresso
 , circt
@@ -11,7 +12,8 @@ stdenvNoCC.mkDerivation {
   name = "${elaborator.name}-elaborate";
 
   nativeBuildInputs = [ espresso circt ];
-
+  
+  src = ./../../configs;
   passthru = {
     inherit elaborator;
   };
@@ -19,7 +21,7 @@ stdenvNoCC.mkDerivation {
   buildCommand = ''
     mkdir -p elaborate $out
 
-    ${elaborator}/bin/elaborator --target-dir elaborate
+    ${elaborator}/bin/elaborator design --parameter $src/${elaborator.elaborateTarget}.json --target-dir elaborate
 
     firtool elaborate/*.fir \
       --annotation-file elaborate/*.anno.json \
