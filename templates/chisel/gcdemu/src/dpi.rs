@@ -6,7 +6,6 @@ use crate::drive::Driver;
 use crate::GcdArgs;
 use clap::Parser;
 use num_bigint::BigUint;
-use num_traits::{Float, ToPrimitive};
 use svdpi::sys::dpi::{svBitVecVal, svLogic};
 use svdpi::SvScope;
 
@@ -75,6 +74,10 @@ unsafe extern "C" fn gcd_init() {
     let mut dpi_target = DPI_TARGET.lock().unwrap();
     assert!(dpi_target.is_none(), "gcd_init should be called only once");
     *dpi_target = Some(driver);
+
+    if let Some(driver) = dpi_target.as_mut() {
+        driver.init();
+    }
 }
 
 #[no_mangle]
