@@ -12,6 +12,7 @@ import chisel3.probe.{define, Probe, ProbeValue}
 import chisel3.properties.{AnyClassType, Class, Property}
 import chisel3.util.circt.dpi.RawUnclockedNonVoidFunctionCall
 import chisel3.util.{DecoupledIO, HasExtModuleInline, Valid}
+import chisel3.util.Counter
 
 object GCDParameter {
   implicit def rwP: upickle.default.ReadWriter[GCDParameter] =
@@ -140,12 +141,10 @@ class GCDTestBench(val parameter: GCDTestBenchParameter)
   val simulationTime: UInt = RegInit(0.U(64.W))
   simulationTime := simulationTime + 1.U
   // For each timeout cycles, check it
-  val watchdog = RawUnclockedNonVoidFunctionCall("gcd_watchdog", UInt(8.W))(
-    simulationTime === parameter.timeout.U
-  )
-  when(watchdog =/= 0.U) {
-    // FIXME: calling stop here causes the logic to be optimised
-    // stop(cf"""{"event":"SimulationStop","reason": ${watchdog},"cycle":${simulationTime}}\n""")
+  val (_, callWatchdog) = Counter(true.B, parameter.timeout)
+  val watchdogCode = RawUnclockedNonVoidFunctionCall("gcd_watchdog", UInt(8.W))(callWatchdog)
+  when(watchdogCode =/= 0.U) {
+    stop(cf"""{"event":"SimulationStop","reason": ${watchdogCode},"cycle":${simulationTime}}\n""")
   }
   class TestPayload extends Bundle {
     val x = UInt(parameter.gcdParameter.width.W)
@@ -177,6 +176,7 @@ class GCDTestBench(val parameter: GCDTestBenchParameter)
     ),
     label = Some("GCD_ASSERT_MULTIPLE_REQ")
   )
+  dontTouch(dut.io.output.bits)
   // FIXME
   // AssertProperty(
   //   BoolSequence(
