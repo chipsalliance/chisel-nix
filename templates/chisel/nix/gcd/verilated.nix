@@ -10,6 +10,8 @@ stdenv.mkDerivation {
   # IIRC: zlib is required for 
   propagatedBuildInputs = [ zlib ];
 
+  passthru = { inherit dpi-lib; };
+
   buildPhase = ''
     runHook preBuild
 

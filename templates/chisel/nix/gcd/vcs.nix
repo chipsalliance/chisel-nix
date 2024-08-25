@@ -1,10 +1,4 @@
-{ lib
-, bash
-, stdenv
-, rtl
-, vcs-dpi-lib
-, vcs-fhs-env
-}:
+{ lib, bash, stdenv, rtl, vcs-dpi-lib, vcs-fhs-env }:
 
 stdenv.mkDerivation {
   name = "vcs";
@@ -29,11 +23,13 @@ stdenv.mkDerivation {
       -full64 \
       -timescale=1ns/1ps \
       -P $VERDI_HOME/share/PLI/VCS/LINUX64/novas.tab $VERDI_HOME/share/PLI/VCS/LINUX64/pli.a \
-      ${lib.optionalString vcs-dpi-lib.enable-trace ''
-        -debug_access+pp+dmptf+thread \
-        -kdb=common_elab,hgldd_all''} \
+      ${
+        lib.optionalString vcs-dpi-lib.enable-trace ''
+          -debug_access+pp+dmptf+thread \
+          -kdb=common_elab,hgldd_all''
+      } \
       -file filelist.f \
-      ${vcs-dpi-lib}/lib/libdpi.a \
+      ${vcs-dpi-lib}/lib/libgcdemu.a \
       -o gcd-vcs-simulator
 
     runHook postBuild
@@ -42,6 +38,7 @@ stdenv.mkDerivation {
   passthru = {
     inherit (vcs-dpi-lib) enable-trace;
     inherit vcs-fhs-env;
+    inherit dpi-lib;
   };
 
   shellHook = ''

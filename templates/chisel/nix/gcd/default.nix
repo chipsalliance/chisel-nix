@@ -25,7 +25,13 @@ lib.makeScope newScope (scope: {
   verilated = scope.callPackage ./verilated.nix { rtl = scope.tb-rtl; };
   verilated-trace =
     scope.verilated.override { tb-dpi-lib = scope.tb-dpi-lib-trace; };
-  vcs = scope.callPackage ./vcs.nix { };
+  vcs = scope.callPackage ./vcs.nix {
+    vcs-dpi-lib = scope.tb-dpi-lib.override { sv2023 = false; };
+    rtl = scope.tb-rtl;
+  };
+  vcs-trace = scope.vcs.override {
+    dpi-lib = scope.vcs.dpi-lib.override { enable-trace = true; };
+  };
 
   # TODO: designConfig should be read from OM
   tbConfig = with builtins;

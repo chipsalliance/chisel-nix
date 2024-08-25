@@ -47,6 +47,14 @@ impl Driver {
         }
     }
 
+    pub(crate) fn init(&mut self) {
+        #[cfg(feature = "trace")]
+        if self.dump_start == 0 {
+            self.start_dump_wave();
+            self.dump_started = true;
+        }
+    }
+
     pub(crate) fn get_input(&mut self) -> TestPayload {
         fn gcd(x: BigUint, y: BigUint) -> BigUint {
             if y.is_zero() {
@@ -59,9 +67,17 @@ impl Driver {
         let mut rng = rand::thread_rng();
         let x = rng.gen_biguint(self.data_width);
         let y = rng.gen_biguint(self.data_width);
+        let result = gcd(x.clone(), y.clone());
 
         self.last_input_cycle = get_time();
         self.test_num += 1;
+        trace!(
+            "[{}] input is x={} y={} result={}",
+            get_time(),
+            &x,
+            &y,
+            &result
+        );
         TestPayload {
             valid: 1,
             bits: TestPayloadBits { x, y, result },
@@ -92,7 +108,7 @@ impl Driver {
                 self.start_dump_wave();
                 self.dump_started = true;
             }
-            trace!("[{}] watchdog continue", tick);
+            trace!("[{tick}] watchdog continue");
             WATCHDOG_CONTINUE
         }
     }

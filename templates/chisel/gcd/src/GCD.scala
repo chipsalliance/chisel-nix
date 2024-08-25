@@ -10,7 +10,7 @@ import chisel3.ltl.Property.{eventually, not}
 import chisel3.ltl.{AssertProperty, CoverProperty, Delay, Sequence}
 import chisel3.probe.{define, Probe, ProbeValue}
 import chisel3.properties.{AnyClassType, Class, Property}
-import chisel3.util.circt.dpi.RawUnclockedNonVoidFunctionCall
+import chisel3.util.circt.dpi.{RawClockedNonVoidFunctionCall, RawUnclockedNonVoidFunctionCall}
 import chisel3.util.{DecoupledIO, HasExtModuleInline, Valid}
 import chisel3.util.Counter
 
@@ -60,7 +60,8 @@ class GCD(val parameter: GCDParameter)
   override protected def implicitReset: Reset = io.reset
 
   val x: UInt = Reg(chiselTypeOf(io.input.bits.x))
-  val y: UInt = Reg(chiselTypeOf(io.input.bits.x))
+  // Block X-state propagation
+  val y: UInt = RegInit(chiselTypeOf(io.input.bits.x), 0.U)
   val busy = y =/= 0.U
 
   when(x > y) { x := x - y }.otherwise { y := y - x }
@@ -152,9 +153,7 @@ class GCDTestBench(val parameter: GCDTestBenchParameter)
     val result = UInt(parameter.gcdParameter.width.W)
   }
   val request =
-    RawUnclockedNonVoidFunctionCall("gcd_input", Valid(new TestPayload))(
-      dut.io.input.ready
-    )
+    RawClockedNonVoidFunctionCall("gcd_input", Valid(new TestPayload))(dut.io.clock, dut.io.input.ready)
   dut.io.input.valid := request.valid
   dut.io.input.bits := request.bits
 

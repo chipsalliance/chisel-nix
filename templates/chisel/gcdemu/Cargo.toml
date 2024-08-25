@@ -13,7 +13,6 @@ tracing = "0.1.40"
 tracing-subscriber = { version = "0.3.18", features = ["env-filter", "ansi"] }
 
 [features]
-default = ["sv2023"]
 sv2023 = ["svdpi/sv2023"]
 trace = []
 vpi = ["svdpi/vpi"]
