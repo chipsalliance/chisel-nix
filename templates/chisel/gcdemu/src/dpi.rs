@@ -1,11 +1,14 @@
+use std::cmp::max;
 use std::ffi::{c_char, CString};
 use std::sync::Mutex;
 
 use crate::drive::Driver;
-use svdpi::sys::dpi::{svBitVecVal, svLogic};
-use svdpi::SvScope;
 use crate::GcdArgs;
 use clap::Parser;
+use num_bigint::BigUint;
+use num_traits::{Float, ToPrimitive};
+use svdpi::sys::dpi::{svBitVecVal, svLogic};
+use svdpi::SvScope;
 
 pub type SvBitVecVal = u32;
 
@@ -15,13 +18,13 @@ pub type SvBitVecVal = u32;
 
 static DPI_TARGET: Mutex<Option<Box<Driver>>> = Mutex::new(None);
 
-#[repr(C)]
+#[derive(Debug)]
 pub(crate) struct TestPayloadBits {
-    pub(crate) x: Vec<u8>,
-    pub(crate) y: Vec<u8>,
-    pub(crate) result: Vec<u8>,
+    pub(crate) x: BigUint,
+    pub(crate) y: BigUint,
+    pub(crate) result: BigUint,
 }
-#[repr(C)]
+#[derive(Debug)]
 pub(crate) struct TestPayload {
     pub(crate) valid: svLogic,
     pub(crate) bits: TestPayloadBits,
@@ -33,17 +36,26 @@ unsafe fn write_to_pointer(dst: *mut u8, data: &[u8]) {
 }
 
 unsafe fn fill_test_payload(dst: *mut SvBitVecVal, data_width: u64, payload: &TestPayload) {
-    let data_len = (data_width / 8) as usize;
+    let biguint_to_vec = |x: &BigUint| -> Vec<u8> {
+        let mut x_bytes = x.to_bytes_le();
+        let n = x_bytes.len();
+        x_bytes.resize((data_width as f64 / 8f64).ceil() as usize, 0);
+        x_bytes.rotate_left(n);
+        x_bytes
+    };
+
     assert!(
-        payload.bits.x.len() == payload.bits.y.len()
-            && payload.bits.y.len() == payload.bits.result.len()
+        max(
+            max(payload.bits.x.bits(), payload.bits.y.bits()),
+            payload.bits.result.bits()
+        ) <= data_width
     );
-    assert!(payload.bits.result.len() <= data_len);
-    let data = vec![payload.valid]
-        .iter()
-        .chain(payload.bits.x.iter())
-        .chain(payload.bits.y.iter())
-        .chain(payload.bits.result.iter())
+
+    // The field in the struct is the most significant first
+    let data = (biguint_to_vec(&payload.bits.result).iter())
+        .chain(biguint_to_vec(&payload.bits.y).iter())
+        .chain(biguint_to_vec(&payload.bits.x).iter())
+        .chain(vec![payload.valid].iter())
         .cloned()
         .collect::<Vec<u8>>();
     write_to_pointer(dst as *mut u8, &data);
@@ -69,11 +81,6 @@ unsafe extern "C" fn gcd_init() {
 unsafe extern "C" fn gcd_watchdog(reason: *mut c_char) {
     let mut driver = DPI_TARGET.lock().unwrap();
     if let Some(driver) = driver.as_mut() {
-        // FIXME
-        // let code = driver.watchdog();
-        // if code != 0 {
-        //     exit(code as i32);
-        // }
         *reason = driver.watchdog() as c_char
     }
 }
