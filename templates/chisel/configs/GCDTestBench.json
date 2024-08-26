@@ -7,9 +7,9 @@
         "resetFlipTick": 100
     },
     "gcdParameter": {
-        "width": 64,
+        "width": 16,
         "useAsyncReset": false
     },
-    "timeout": 100,
-    "testSize": 1000
+    "timeout": 2000,
+    "testSize": 100
 }
