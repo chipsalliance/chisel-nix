@@ -1,4 +1,4 @@
-{ lib, stdenv, rtl, verilator, zlib, tb-dpi-lib, thread-num ? 8 }:
+{ lib, stdenv, rtl, verilator, zlib, dpi-lib, thread-num ? 8 }:
 stdenv.mkDerivation {
   name = "verilated";
 
@@ -19,13 +19,13 @@ stdenv.mkDerivation {
     echo `ls`
     # TODO: maybe leave these args to be passed from nix?
     verilator \
-      ${lib.optionalString tb-dpi-lib.enable-trace "--trace-fst"} \
+      ${lib.optionalString dpi-lib.enable-trace "--trace-fst"} \
       --timing \
       --threads ${toString thread-num} \
       -O1 \
       --main \
       --exe \
-      --cc GCDTestBench ${tb-dpi-lib}/lib/libgcdemu.a
+      --cc -f filelist.f --top GCDTestBench ${dpi-lib}/lib/libgcdemu.a
 
     echo "[nix] building verilated C lib"
 

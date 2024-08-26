@@ -5,8 +5,11 @@
   "--verification-flavor=if-else-fatal"
   "--lowering-options=verifLabels,omitVersionComment"
   "--strip-debug-info"
-] }:
-stdenvNoCC.mkDerivation {
+], enable-layers ? [ ] }:
+let
+  processLayer = lib.map (str: "./" + lib.replaceStrings [ "." ] [ "/" ] str);
+  enableLayersDirs = processLayer enable-layers;
+in stdenvNoCC.mkDerivation {
   name = "${mlirbc.name}-rtl";
   nativeBuildInputs = [ circt ];
 
@@ -18,5 +21,11 @@ stdenvNoCC.mkDerivation {
     firtool ${mlirbc}/${mlirbc.name}-lowered.mlirbc -o $out ${
       lib.escapeShellArgs mfcArgs
     }
+
+    pushd $out
+    find . ${
+      lib.concatStringsSep " " enableLayersDirs
+    } -maxdepth 1 -name "*.sv" -type f -print > ./filelist.f
+    popd
   '';
 }

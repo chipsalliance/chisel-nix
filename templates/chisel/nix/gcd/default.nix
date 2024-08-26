@@ -20,14 +20,23 @@ lib.makeScope newScope (scope: {
     scope.callPackage ./mlirbc.nix { elaborate = scope.tb-elaborate; };
   tb-rtl = scope.callPackage ./rtl.nix { mlirbc = scope.tb-mlirbc; };
   tb-dpi-lib = scope.callPackage ./dpi-lib.nix { };
-  tb-dpi-lib-trace = scope.tb-dpi-lib.override { enable-trace = true; };
 
-  verilated = scope.callPackage ./verilated.nix { rtl = scope.tb-rtl; };
-  verilated-trace =
-    scope.verilated.override { tb-dpi-lib = scope.tb-dpi-lib-trace; };
+  verilated = scope.callPackage ./verilated.nix {
+    rtl = scope.tb-rtl.override { enable-layers = [ "Verification" ]; };
+    dpi-lib = scope.tb-dpi-lib;
+  };
+  verilated-trace = scope.verilated.override {
+    dpi-lib = scope.verilated.dpi-lib.override { enable-trace = true; };
+  };
   vcs = scope.callPackage ./vcs.nix {
-    vcs-dpi-lib = scope.tb-dpi-lib.override { sv2023 = false; };
-    rtl = scope.tb-rtl;
+    dpi-lib = scope.tb-dpi-lib.override {
+      sv2023 = false;
+      vpi = true;
+    };
+    rtl = scope.tb-rtl.override {
+      enable-layers =
+        [ "Verification" "Verification.Assert" "Verification.Cover" ];
+    };
   };
   vcs-trace = scope.vcs.override {
     dpi-lib = scope.vcs.dpi-lib.override { enable-trace = true; };
