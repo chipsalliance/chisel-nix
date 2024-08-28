@@ -1,3 +1,6 @@
+# SPDX-License-Identifier: Apache-2.0
+# SPDX-FileCopyrightText: 2024 Jiuyang Liu <liu@jiuyang.me>
+
 { stdenvNoCC, mill, writeText, makeSetupHook, runCommand, lib }:
 
 { name, src, millDepsHash, ... }@args:
