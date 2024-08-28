@@ -2,7 +2,6 @@
   "-O=release"
   "--split-verilog"
   "--preserve-values=all"
-  "--verification-flavor=if-else-fatal"
   "--lowering-options=verifLabels,omitVersionComment"
   "--strip-debug-info"
 ], enable-layers ? [ ] }:
