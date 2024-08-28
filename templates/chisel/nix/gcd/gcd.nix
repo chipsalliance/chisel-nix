@@ -1,44 +1,34 @@
-{ lib
-, stdenv
-, fetchMillDeps
-, makeWrapper
-, jdk21
+{ lib, stdenv, fetchMillDeps, makeWrapper, jdk21
 
-  # chisel deps
-, mill
-, espresso
-, circt-full
-, jextract-21
-, add-determinism
+# chisel deps
+, mill, espresso, circt-full, jextract-21, add-determinism
 
 , projectDependencies
 
-, target
-}:
+, target }:
 
 let
   self = stdenv.mkDerivation rec {
     name = "gcd";
 
-    src = with lib.fileset; toSource {
-      root = ./../..;
-      fileset = unions [
-        ./../../build.sc
-        ./../../common.sc
-        ./../../gcd
-        ./../../elaborator
-      ];
-    };
-
-    passthru.millDeps = fetchMillDeps {
-      inherit name;
-      src = with lib.fileset; toSource {
+    src = with lib.fileset;
+      toSource {
         root = ./../..;
         fileset = unions [
           ./../../build.sc
           ./../../common.sc
+          ./../../gcd
+          ./../../elaborator
         ];
       };
+
+    passthru.millDeps = fetchMillDeps {
+      inherit name;
+      src = with lib.fileset;
+        toSource {
+          root = ./../..;
+          fileset = unions [ ./../../build.sc ./../../common.sc ];
+        };
       millDepsHash = "sha256-ziXh1Pta9MQEzLzjtuppx1ll/57CdKADdSjCNdcIOGg=";
       nativeBuildInputs = [ projectDependencies.setupHook ];
     };
@@ -49,9 +39,8 @@ let
         mill mill.bsp.BSP/install 0
       '';
     });
-    
-    passthru.elaborateTarget = target;
 
+    passthru.elaborateTarget = target;
 
     shellHook = ''
       setupSubmodules
@@ -87,8 +76,7 @@ let
 
       mkdir -p $elaborator/bin
       makeWrapper ${jdk21}/bin/java $elaborator/bin/elaborator \
-        --add-flags "--enable-preview -Djava.library.path=${circt-full}/lib -cp $out/share/java/elaborator.jar org.chipsalliance.t1.elaborator.rocketv.${target}"
+        --add-flags "--enable-preview -Djava.library.path=${circt-full}/lib -cp $out/share/java/elaborator.jar org.chipsalliance.gcd.elaborator.${target}"
     '';
   };
-in
-self
+in self

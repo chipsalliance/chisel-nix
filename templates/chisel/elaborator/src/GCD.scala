@@ -1,10 +1,10 @@
 // SPDX-License-Identifier: Apache-2.0
 // SPDX-FileCopyrightText: 2024 Jiuyang Liu <liu@jiuyang.me>
-package org.chipsalliance.t1.elaborator.rocketv
+package org.chipsalliance.gcd.elaborator
 
 import mainargs._
 import org.chipsalliance.gcd.{GCD, GCDParameter}
-import org.chipsalliance.t1.elaborator.Elaborator
+import org.chipsalliance.gcd.elaborator.Elaborator
 
 object GCD extends Elaborator {
   @main

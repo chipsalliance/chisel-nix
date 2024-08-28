@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: Apache-2.0
 // SPDX-FileCopyrightText: 2024 Jiuyang Liu <liu@jiuyang.me>
-package org.chipsalliance.t1.elaborator
+package org.chipsalliance.gcd.elaborator
 
 import chisel3.RawModule
 import chisel3.experimental.{SerializableModule, SerializableModuleGenerator, SerializableModuleParameter}
