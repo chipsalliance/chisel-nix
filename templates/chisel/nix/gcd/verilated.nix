@@ -17,7 +17,6 @@ stdenv.mkDerivation {
 
     echo "[nix] running verilator"
     echo `ls`
-    # TODO: maybe leave these args to be passed from nix?
     verilator \
       ${lib.optionalString dpi-lib.enable-trace "--trace-fst"} \
       --timing \
