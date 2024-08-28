@@ -1,3 +1,6 @@
+# SPDX-License-Identifier: Apache-2.0
+# SPDX-FileCopyrightText: 2024 Jiuyang Liu <liu@jiuyang.me>
+
 { pkgs, makeSetupHook, writeText, lib, generatedNixPath ? ./dependencies/_sources/generated.nix }:
 
 let

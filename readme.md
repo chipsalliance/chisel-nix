@@ -122,3 +122,6 @@ stdenv.mkDerivation {
     ]
 }
 ```
+
+# License
+The build system is released under the Apache-2.0 license, including all Nix and mill build system, All rights reserved by Jiuyang Liu <liu@Jiuyang.me>

@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: Apache-2.0
+// SPDX-License-Identifier: Unlicense
 // SPDX-FileCopyrightText: 2024 Jiuyang Liu <liu@jiuyang.me>
 package org.chipsalliance.gcd.elaborator
 
