@@ -44,7 +44,7 @@ class GCDInterface(parameter: GCDParameter) extends Bundle {
     val y = UInt(parameter.width.W)
   }))
   val output = Valid(UInt(parameter.width.W))
-  val probe = Output(Probe(new GCDProbe(parameter)))
+  val probe = Output(Probe(new GCDProbe(parameter), layers.Verification))
   val om = Output(Property[AnyClassType]())
 }
 
