@@ -166,27 +166,33 @@ class GCDTestBench(val parameter: GCDTestBenchParameter)
 
   // LTL Checker
   import Sequence._
+  val inputFire: Sequence = dut.io.input.fire
+  val inputNotFire: Sequence = !dut.io.input.fire
+  val outputFire: Sequence = dut.io.output.valid
+  val outputNotFire: Sequence = !dut.io.output.valid
+  val lastRequestResult: UInt = RegEnable(request.bits.result, dut.io.input.fire)
+  val checkRight: Sequence = lastRequestResult === dut.io.output.bits
+  val outputFireRose: Sequence = outputFire
+  val inputNotValid: Sequence = dut.io.input.ready && !dut.io.input.valid
+
   AssertProperty(
-    dut.io.input.fire |=> (!dut.io.input.fire).repeatAtLeast(1) ### dut.io.output.valid,
+    inputFire |=> inputNotFire.repeatAtLeast(1) ### outputFire,
     label = Some("GCD_ALWAYS_RESPONSE")
   )
   AssertProperty(
-    dut.io.input.fire |=> not((!dut.io.output.valid).repeatAtLeast(1) ### (!dut.io.output.valid && dut.io.input.fire)
-    ),
+    inputFire |=> not(inputNotFire.repeatAtLeast(1) ### (outputNotFire and inputFire)),
     label = Some("GCD_NO_DOUBLE_FIRE")
   )
-  
-  val lastRequestResult = RegEnable(request.bits.result, dut.io.input.fire)
   AssertProperty(
-    dut.io.output.valid |-> lastRequestResult === dut.io.output.bits,
+    outputFire |-> checkRight,
     label = Some("GCD_ASSERT_RESULT_CHECK")
   )
   CoverProperty(
-    (!dut.io.output.fire ### dut.io.output.fire).repeatAtLeast(parameter.testSize),
+    (outputFire ##* outputFire).repeatAtLeast(parameter.testSize),
     label = Some("GCD_COVER_FIRE")
   )
   CoverProperty(
-    BoolSequence(dut.io.input.ready && !dut.io.input.valid),
+    inputNotValid,
     label = Some("GCD_COVER_BACK_PRESSURE")
   )
 }
