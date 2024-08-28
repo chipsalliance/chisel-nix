@@ -29,6 +29,7 @@ stdenv.mkDerivation {
           -kdb=common_elab,hgldd_all''
       } \
       -file filelist.f \
+      -assert enable_diag \
       ${dpi-lib}/lib/libgcdemu.a \
       -o gcd-vcs-simulator
 
