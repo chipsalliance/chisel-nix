@@ -1,5 +1,5 @@
 { lib, rustPlatform, tbConfig, sv2023 ? true, vpi ? false, enable-trace ? false
-}:
+, timescale ? 1 }:
 
 rustPlatform.buildRustPackage rec {
   name = "dpi-lib";
@@ -12,6 +12,7 @@ rustPlatform.buildRustPackage rec {
     DESIGN_DATA_WIDTH = tbConfig.gcdParameter.width;
     DESIGN_TIMEOUT = tbConfig.timeout;
     DESIGN_TEST_SIZE = tbConfig.testSize;
+    CLOCK_FLIP_TIME = tbConfig.testVerbatimParameter.clockFlipTick * timescale;
   };
 
   passthru = {

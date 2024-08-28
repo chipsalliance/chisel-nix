@@ -39,7 +39,10 @@ lib.makeScope newScope (scope: {
     };
   };
   vcs-trace = scope.vcs.override {
-    dpi-lib = scope.vcs.dpi-lib.override { enable-trace = true; };
+    dpi-lib = scope.vcs.dpi-lib.override {
+      enable-trace = true;
+      timescale = 1000;
+    };
   };
 
   # TODO: designConfig should be read from OM

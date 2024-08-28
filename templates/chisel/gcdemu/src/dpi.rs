@@ -37,9 +37,7 @@ unsafe fn write_to_pointer(dst: *mut u8, data: &[u8]) {
 unsafe fn fill_test_payload(dst: *mut SvBitVecVal, data_width: u64, payload: &TestPayload) {
     let biguint_to_vec = |x: &BigUint| -> Vec<u8> {
         let mut x_bytes = x.to_bytes_le();
-        let n = x_bytes.len();
         x_bytes.resize((data_width as f64 / 8f64).ceil() as usize, 0);
-        x_bytes.rotate_left(n);
         x_bytes
     };
 
@@ -84,7 +82,7 @@ unsafe extern "C" fn gcd_init() {
 unsafe extern "C" fn gcd_watchdog(reason: *mut c_char) {
     let mut driver = DPI_TARGET.lock().unwrap();
     if let Some(driver) = driver.as_mut() {
-        *reason = driver.watchdog() as c_char
+        *reason = driver.watchdog() as c_char;
     }
 }
 

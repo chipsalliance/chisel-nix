@@ -30,6 +30,9 @@ pub(crate) struct GcdArgs {
 
     #[arg(long, hide = true,default_value = env!("DESIGN_TEST_SIZE"))]
     test_size: u64,
+
+    #[arg(long, hide = true,default_value = env!("CLOCK_FLIP_TIME"))]
+    clock_flip_time: u64,
 }
 
 impl GcdArgs {

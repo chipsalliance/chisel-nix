@@ -1,5 +1,6 @@
 use num_bigint::{BigUint, RandBigInt};
 use num_traits::Zero;
+use rand::Rng;
 use tracing::{error, info, trace};
 
 use crate::{
@@ -13,6 +14,7 @@ pub(crate) struct Driver {
     pub(crate) data_width: u64,
     pub(crate) timeout: u64,
     pub(crate) test_size: u64,
+    pub(crate) clock_flip_time: u64,
 
     #[cfg(feature = "trace")]
     wave_path: String,
@@ -28,6 +30,10 @@ pub(crate) struct Driver {
 }
 
 impl Driver {
+    fn get_tick(&self) -> u64 {
+        get_time() / self.clock_flip_time
+    }
+
     pub(crate) fn new(scope: SvScope, args: &GcdArgs) -> Self {
         Self {
             scope,
@@ -42,6 +48,7 @@ impl Driver {
             data_width: args.data_width,
             timeout: args.timeout,
             test_size: args.test_size,
+            clock_flip_time: args.clock_flip_time,
             test_num: 0,
             last_input_cycle: 0,
         }
@@ -69,17 +76,22 @@ impl Driver {
         let y = rng.gen_biguint(self.data_width);
         let result = gcd(x.clone(), y.clone());
 
-        self.last_input_cycle = get_time();
+        self.last_input_cycle = self.get_tick();
         self.test_num += 1;
         trace!(
-            "[{}] input is x={} y={} result={}",
-            get_time(),
+            "[{}] the {}th input is x={} y={} result={}",
+            self.get_tick(),
+            self.test_num,
             &x,
             &y,
             &result
         );
         TestPayload {
-            valid: 1,
+            valid: if rand::thread_rng().gen::<f64>() < 0.95 {
+                1
+            } else {
+                0
+            },
             bits: TestPayloadBits { x, y, result },
         }
     }
@@ -89,12 +101,15 @@ impl Driver {
         const WATCHDOG_TIMEOUT: u8 = 1;
         const WATCHDOG_FINISH: u8 = 2;
 
-        let tick = get_time();
+        let tick = self.get_tick();
         if self.test_num >= self.test_size {
             info!("[{tick}] test finished, exiting");
             WATCHDOG_FINISH
         } else if tick - self.last_input_cycle > self.timeout {
-            error!("[{tick}] watchdog timeout");
+            error!(
+                "[{}] watchdog timeout, last input tick = {}",
+                tick, self.last_input_cycle
+            );
             WATCHDOG_TIMEOUT
         } else {
             #[cfg(feature = "trace")]

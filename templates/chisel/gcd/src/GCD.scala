@@ -11,8 +11,7 @@ import chisel3.ltl.{AssertProperty, CoverProperty, Delay, Sequence}
 import chisel3.probe.{define, Probe, ProbeValue}
 import chisel3.properties.{AnyClassType, Class, Property}
 import chisel3.util.circt.dpi.{RawClockedNonVoidFunctionCall, RawUnclockedNonVoidFunctionCall}
-import chisel3.util.{DecoupledIO, HasExtModuleInline, Valid}
-import chisel3.util.Counter
+import chisel3.util.{Counter, DecoupledIO, HasExtModuleInline, RegEnable, Valid}
 
 object GCDParameter {
   implicit def rwP: upickle.default.ReadWriter[GCDParameter] =
@@ -62,6 +61,7 @@ class GCD(val parameter: GCDParameter)
   val x: UInt = Reg(chiselTypeOf(io.input.bits.x))
   // Block X-state propagation
   val y: UInt = RegInit(chiselTypeOf(io.input.bits.x), 0.U)
+  val startupFlag = RegInit(false.B)
   val busy = y =/= 0.U
 
   when(x > y) { x := x - y }.otherwise { y := y - x }
@@ -69,11 +69,12 @@ class GCD(val parameter: GCDParameter)
   when(io.input.fire) {
     x := io.input.bits.x
     y := io.input.bits.y
+    startupFlag := true.B
   }
 
   io.input.ready := !busy
   io.output.bits := x
-  io.output.valid := !busy
+  io.output.valid := startupFlag && !busy
 
   // Assign Probe
   val probeWire: GCDProbe = Wire(new GCDProbe(parameter))
@@ -141,8 +142,8 @@ class GCDTestBench(val parameter: GCDTestBenchParameter)
   // Simulation Logic
   val simulationTime: UInt = RegInit(0.U(64.W))
   simulationTime := simulationTime + 1.U
-  // For each timeout cycles, check it
-  val (_, callWatchdog) = Counter(true.B, parameter.timeout)
+  // For each timeout ticks, check it
+  val (_, callWatchdog) = Counter(true.B, parameter.timeout / 2)
   val watchdogCode = RawUnclockedNonVoidFunctionCall("gcd_watchdog", UInt(8.W))(callWatchdog)
   when(watchdogCode =/= 0.U) {
     stop(cf"""{"event":"SimulationStop","reason": ${watchdogCode},"cycle":${simulationTime}}\n""")
@@ -153,42 +154,47 @@ class GCDTestBench(val parameter: GCDTestBenchParameter)
     val result = UInt(parameter.gcdParameter.width.W)
   }
   val request =
-    RawClockedNonVoidFunctionCall("gcd_input", Valid(new TestPayload))(dut.io.clock, dut.io.input.ready)
-  dut.io.input.valid := request.valid
-  dut.io.input.bits := request.bits
+    RawClockedNonVoidFunctionCall("gcd_input", Valid(new TestPayload))(
+      dut.io.clock,
+      !dut.io.reset.asBool && dut.io.input.ready
+    )
+  when(dut.io.input.ready) {
+    dut.io.input.valid := request.valid
+    dut.io.input.bits := request.bits
+  }.otherwise {
+    dut.io.input.valid := false.B;
+    dut.io.input.bits := DontCare;
+  }
 
   // LTL Checker
   import Sequence._
+  val inputFire:         Sequence = dut.io.input.fire
+  val inputNotFire:      Sequence = !dut.io.input.fire
+  val outputFire:        Sequence = dut.io.output.valid
+  val outputNotFire:     Sequence = !dut.io.output.valid
+  val lastRequestResult: UInt = RegEnable(request.bits.result, dut.io.input.fire)
+  val checkRight:        Sequence = lastRequestResult === dut.io.output.bits
+  val inputNotValid:     Sequence = dut.io.input.ready && !dut.io.input.valid
+
   AssertProperty(
-    BoolSequence(request.fire) |-> eventually(dut.io.output.valid),
-    label = Some("GCD_ASSERT_REQ_SHOULD_RESP")
+    inputFire |=> inputNotFire.repeatAtLeast(1) ### outputFire,
+    label = Some("GCD_ALWAYS_RESPONSE")
   )
   AssertProperty(
-    not(
-      Sequence(
-        request.fire,
-        Delay(),
-        request.fire,
-        Delay(),
-        dut.io.output.valid
-      )
-    ),
-    label = Some("GCD_ASSERT_MULTIPLE_REQ")
+    inputFire |=> not(inputNotFire.repeatAtLeast(1) ### (outputNotFire.and(inputFire))),
+    label = Some("GCD_NO_DOUBLE_FIRE")
   )
-  dontTouch(dut.io.output.bits)
-  // FIXME
-  // AssertProperty(
-  //   BoolSequence(
-  //     dut.io.output.valid && (request.bits.result === dut.io.output.bits)
-  //   ),
-  //   label = Some("GCD_ASSERT_RESULT_CHECK")
+  AssertProperty(
+    outputFire |-> checkRight,
+    label = Some("GCD_ASSERT_RESULT_CHECK")
+  )
+  // TODO: need generate $rose function in SVA
+  // CoverProperty(
+  //   rose(outputFire).nonConsecutiveRepeat(parameter.testSize - 1),
+  //   label = Some("GCD_COVER_FIRE")
   // )
   CoverProperty(
-    repeatAtLeast(BoolSequence(dut.io.input.fire), parameter.testSize),
-    label = Some("GCD_COVER_FIRE")
-  )
-  CoverProperty(
-    BoolSequence(dut.io.input.ready && !dut.io.input.valid),
+    inputNotValid,
     label = Some("GCD_COVER_BACK_PRESSURE")
   )
 }
@@ -243,6 +249,7 @@ class TestVerbatim(parameter: TestVerbatimParameter)
        |`ifdef VCS
        |    $$fsdbDumpfile(file);
        |    $$fsdbDumpvars("+all");
+       |    $$fsdbDumpSVA;
        |    $$fsdbDumpon;
        |`endif
        |`ifdef VERILATOR
