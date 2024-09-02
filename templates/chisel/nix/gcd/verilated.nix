@@ -2,7 +2,8 @@
 # SPDX-FileCopyrightText: 2024 Jiuyang Liu <liu@jiuyang.me>
 
 { lib, stdenv, rtl, verilator, zlib, dpi-lib, thread-num ? 8 }:
-stdenv.mkDerivation {
+let vName = "V${rtl.target}";
+in stdenv.mkDerivation {
   name = "verilated";
 
   src = rtl;
@@ -13,7 +14,10 @@ stdenv.mkDerivation {
   # IIRC: zlib is required for 
   propagatedBuildInputs = [ zlib ];
 
-  passthru = { inherit dpi-lib; };
+  passthru = {
+    inherit dpi-lib;
+    inherit (rtl) target;
+  };
 
   buildPhase = ''
     runHook preBuild
@@ -27,7 +31,7 @@ stdenv.mkDerivation {
       -O1 \
       --main \
       --exe \
-      --cc -f filelist.f --top GCDTestBench ${dpi-lib}/lib/libgcdemu.a
+      --cc -f filelist.f --top ${rtl.target} ${dpi-lib}/lib/${dpi-lib.libOutName}
 
     echo "[nix] building verilated C lib"
 
@@ -37,7 +41,7 @@ stdenv.mkDerivation {
 
     # We can't use -C here because the Makefile is generated with relative path
     cd obj_dir
-    make -j "$NIX_BUILD_CORES" -f VGCDTestBench.mk VGCDTestBench
+    make -j "$NIX_BUILD_CORES" -f ${vName}.mk ${vName}
 
     runHook postBuild
   '';
@@ -48,7 +52,7 @@ stdenv.mkDerivation {
     mkdir -p $out/{include,lib,bin}
     cp *.h $out/include
     cp *.a $out/lib
-    cp VGCDTestBench $out/bin
+    cp ${vName} $out/bin
 
     runHook postInstall
   '';

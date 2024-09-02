@@ -15,7 +15,10 @@ in stdenvNoCC.mkDerivation {
   name = "${mlirbc.name}-rtl";
   nativeBuildInputs = [ circt ];
 
-  passthru = { inherit mlirbc; };
+  passthru = {
+    inherit mlirbc;
+    inherit (mlirbc) target;
+  };
 
   buildCommand = ''
     mkdir -p $out

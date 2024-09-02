@@ -6,7 +6,7 @@ import mainargs._
 import org.chipsalliance.gcd.{GCD, GCDParameter}
 import org.chipsalliance.gcd.elaborator.Elaborator
 
-object GCD extends Elaborator {
+object GCDMain extends Elaborator {
   @main
   case class GCDParameterMain(
     @arg(name = "xLen") xLen:                   Int,
