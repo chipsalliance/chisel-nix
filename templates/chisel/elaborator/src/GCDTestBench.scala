@@ -5,9 +5,9 @@ package org.chipsalliance.gcd.elaborator
 import mainargs._
 import org.chipsalliance.gcd.{GCDTestBench, GCDTestBenchParameter, TestVerbatimParameter}
 import org.chipsalliance.gcd.elaborator.Elaborator
-import org.chipsalliance.gcd.elaborator.GCD.GCDParameterMain
+import org.chipsalliance.gcd.elaborator.GCDMain.GCDParameterMain
 
-object GCDTestBench extends Elaborator {
+object GCDTestBenchMain extends Elaborator {
   @main
   case class GCDTestBenchParameterMain(
     @arg(name = "testVerbatimParameter") testVerbatimParameter: TestVerbatimParameterMain,

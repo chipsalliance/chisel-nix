@@ -2,8 +2,8 @@
 # SPDX-FileCopyrightText: 2024 Jiuyang Liu <liu@jiuyang.me>
 
 { lib, bash, stdenv, rtl, dpi-lib, vcs-fhs-env }:
-
-stdenv.mkDerivation {
+let binName = "gcd-vcs-simulator";
+in stdenv.mkDerivation {
   name = "vcs";
 
   # Add "sandbox = relaxed" into /etc/nix/nix.conf, and run `systemctl restart nix-daemon`
@@ -33,8 +33,8 @@ stdenv.mkDerivation {
       } \
       -file filelist.f \
       -assert enable_diag \
-      ${dpi-lib}/lib/libgcdemu.a \
-      -o gcd-vcs-simulator
+      ${dpi-lib}/lib/${dpi-lib.libOutName} \
+      -o ${binName}
 
     runHook postBuild
   '';
@@ -55,17 +55,17 @@ stdenv.mkDerivation {
     runHook preInstall
 
     mkdir -p $out/bin $out/lib
-    cp gcd-vcs-simulator $out/lib
-    cp -r gcd-vcs-simulator.daidir $out/lib
+    cp ${binName} $out/lib
+    cp -r ${binName}.daidir $out/lib
 
     # We need to carefully handle string escape here, so don't use makeWrapper
-    tee $out/bin/gcd-vcs-simulator <<EOF
+    tee $out/bin/${binName} <<EOF
     #!${bash}/bin/bash
-    export LD_LIBRARY_PATH="$out/lib/gcd-vcs-simulator.daidir:\$LD_LIBRARY_PATH"
+    export LD_LIBRARY_PATH="$out/lib/${binName}.daidir:\$LD_LIBRARY_PATH"
     _argv="\$@"
-    ${vcs-fhs-env}/bin/vcs-fhs-env -c "$out/lib/gcd-vcs-simulator \$_argv"
+    ${vcs-fhs-env}/bin/vcs-fhs-env -c "$out/lib/${binName} \$_argv"
     EOF
-    chmod +x $out/bin/gcd-vcs-simulator
+    chmod +x $out/bin/${binName}
 
     runHook postInstall
   '';
