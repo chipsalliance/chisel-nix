@@ -38,6 +38,7 @@ in
     dpi-lib = scope.tb-dpi-lib.override {
       sv2023 = false;
       vpi = true;
+      timescale = 1000;
     };
     rtl = scope.tb-rtl.override {
       enable-layers =
@@ -45,10 +46,7 @@ in
     };
   };
   vcs-trace = scope.vcs.override {
-    dpi-lib = scope.vcs.dpi-lib.override {
-      enable-trace = true;
-      timescale = 1000;
-    };
+    dpi-lib = scope.vcs.dpi-lib.override { enable-trace = true; };
   };
 
   # TODO: designConfig should be read from OM
