@@ -1,9 +1,19 @@
 # SPDX-License-Identifier: Apache-2.0
 # SPDX-FileCopyrightText: 2024 Jiuyang Liu <liu@jiuyang.me>
 
-{ lib, bash, stdenv, rtl, dpi-lib, vcs-fhs-env }:
-let binName = "gcd-vcs-simulator";
-in stdenv.mkDerivation {
+{ lib
+, bash
+, stdenv
+, rtl
+, dpi-lib
+, vcs-fhs-env
+, runCommand
+}:
+
+let
+  binName = "gcd-vcs-simulator";
+in
+stdenv.mkDerivation (finalAttr: {
   name = "vcs";
 
   # Add "sandbox = relaxed" into /etc/nix/nix.conf, and run `systemctl restart nix-daemon`
@@ -46,6 +56,12 @@ in stdenv.mkDerivation {
     inherit vcs-fhs-env;
     inherit dpi-lib;
     inherit rtl;
+
+    tests.simple-sim = runCommand "${binName}-test" { __noChroot = true; } ''
+      # Combine stderr and stdout and redirect them to tee
+      # So that we can have log saving to output and also printing to stdout
+      ${finalAttr.finalPackage}/bin/${binName} &> >(tee $out)
+    '';
   };
 
   shellHook = ''
@@ -71,4 +87,4 @@ in stdenv.mkDerivation {
 
     runHook postInstall
   '';
-}
+})
