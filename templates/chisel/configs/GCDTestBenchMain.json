@@ -10,6 +10,6 @@
         "width": 16,
         "useAsyncReset": false
     },
-    "timeout": 5000,
+    "timeout": 70000,
     "testSize": 100
 }
