@@ -1,8 +1,15 @@
 # SPDX-License-Identifier: Apache-2.0
 # SPDX-FileCopyrightText: 2024 Jiuyang Liu <liu@jiuyang.me>
 
-{ lib, rustPlatform, tbConfig, dpiLibName, sv2023 ? true, vpi ? false
-, enable-trace ? false, timescale ? 1 }:
+{ lib
+, rustPlatform
+, tbConfig
+, dpiLibName
+, sv2023 ? true
+, vpi ? false
+, enable-trace ? false
+, timescale ? 1
+}:
 
 rustPlatform.buildRustPackage rec {
   name = "dpi-lib";

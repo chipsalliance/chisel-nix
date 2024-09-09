@@ -1,14 +1,23 @@
 # SPDX-License-Identifier: Apache-2.0
 # SPDX-FileCopyrightText: 2024 Jiuyang Liu <liu@jiuyang.me>
 
-{ lib, stdenv, fetchMillDeps, makeWrapper, jdk21
+{ lib
+, stdenv
+, fetchMillDeps
+, makeWrapper
+, jdk21
 
-# chisel deps
-, mill, espresso, circt-full, jextract-21, add-determinism
+  # chisel deps
+, mill
+, espresso
+, circt-full
+, jextract-21
+, add-determinism
 
 , projectDependencies
 
-, target }:
+, target
+}:
 
 let
   self = stdenv.mkDerivation rec {
@@ -88,4 +97,5 @@ let
         --add-flags "--enable-preview -Djava.library.path=${circt-full}/lib -cp $out/share/java/elaborator.jar ${mainClass}"
     '';
   };
-in self
+in
+self
