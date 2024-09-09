@@ -1,0 +1,75 @@
+name: Build and Run Simulation
+on:
+  pull_request:
+    types:
+      - opened
+      - synchronize
+      - reopened
+      - ready_for_review
+      - labeled
+env:
+  USER: runner
+
+# Cancel the current workflow when new commit pushed
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+jobs:
+
+  build-simulators:
+    name: "Build Simulators"
+    runs-on: [self-hosted, linux, nixos, BIGRAM]
+    strategy:
+      fail-fast: false
+    defaults:
+      run:
+        working-directory: ./templates/chisel
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+      - name: "Build vcs simulator"
+        run: |
+          nix build '.#gcd.vcs' --impure
+      - name: "Build vcs simulator with trace"
+        run: |
+          nix build '.#gcd.vcs-trace' --impure
+      - name: "Build verilator simulator"
+        run: |
+          nix build '.#gcd.verilated'
+      - name: "Build verilator simulator with trace"
+        run: |
+          nix build '.#gcd.verilated-trace'
+
+  run-vcs:
+    name: "Run VCS"
+    strategy:
+      fail-fast: false
+    runs-on: [self-hosted, linux, nixos]
+    defaults:
+      run:
+        working-directory: ./templates/chisel
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+      - name: "Run VCS"
+        run: |
+          nix run '.#gcd.vcs' --impure
+
+  run-verilator:
+    name: "Run Verilator"
+    strategy:
+      fail-fast: false
+    runs-on: [self-hosted, linux, nixos]
+    defaults:
+      run:
+        working-directory: ./templates/chisel
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+      - name: "Run verilator"
+        run: |
+          nix run '.#gcd.verilated'
