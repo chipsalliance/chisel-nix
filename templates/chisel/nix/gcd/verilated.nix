@@ -19,6 +19,8 @@ in stdenv.mkDerivation {
     inherit (rtl) target;
   };
 
+  meta.mainProgram = vName;
+
   buildPhase = ''
     runHook preBuild
 

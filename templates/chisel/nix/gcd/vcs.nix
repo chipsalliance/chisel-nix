@@ -15,6 +15,8 @@ in stdenv.mkDerivation {
 
   src = rtl;
 
+  meta.mainProgram = binName;
+
   buildPhase = ''
     runHook preBuild
 

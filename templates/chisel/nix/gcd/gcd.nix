@@ -70,6 +70,8 @@ let
 
     outputs = [ "out" "elaborator" ];
 
+    meta.mainProgram = "elaborator";
+
     buildPhase = ''
       mill -i '__.assembly'
     '';
