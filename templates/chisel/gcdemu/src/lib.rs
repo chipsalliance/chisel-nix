@@ -1,38 +1,22 @@
-use clap::Parser;
+use plusarg::PlusArgMatcher;
 use tracing::Level;
 use tracing_subscriber::{EnvFilter, FmtSubscriber};
 
 pub mod dpi;
 pub mod drive;
+pub mod plusarg;
 
-#[derive(Parser)]
 pub(crate) struct GcdArgs {
     #[cfg(feature = "trace")]
-    #[arg(long)]
     dump_start: u64,
 
     #[cfg(feature = "trace")]
-    #[arg(long)]
     dump_end: u64,
 
     #[cfg(feature = "trace")]
-    #[arg(long)]
     pub wave_path: String,
 
-    #[arg(long, default_value = "info")]
     pub log_level: String,
-
-    #[arg(long, hide = true,default_value = env!("DESIGN_DATA_WIDTH"))]
-    data_width: u64,
-
-    #[arg(long, hide = true,default_value = env!("DESIGN_TIMEOUT"))]
-    timeout: u64,
-
-    #[arg(long, hide = true,default_value = env!("DESIGN_TEST_SIZE"))]
-    test_size: u64,
-
-    #[arg(long, hide = true,default_value = env!("CLOCK_FLIP_TIME"))]
-    clock_flip_time: u64,
 }
 
 impl GcdArgs {
@@ -49,5 +33,17 @@ impl GcdArgs {
         tracing::subscriber::set_global_default(global_logger)
             .expect("internal error: fail to setup log subscriber");
         Ok(())
+    }
+
+    pub fn from_plusargs(matcher: &PlusArgMatcher) -> Self {
+        Self {
+            #[cfg(feature = "trace")]
+            dump_start: matcher.match_("dump-start").parse().unwrap(),
+            #[cfg(feature = "trace")]
+            dump_end: matcher.match_("dump-end").parse().unwrap(),
+            #[cfg(feature = "trace")]
+            wave_path: matcher.match_("wave-path").into(),
+            log_level: matcher.try_match("log-level").unwrap_or("info").into(),
+        }
     }
 }

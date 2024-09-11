@@ -30,17 +30,16 @@ jobs:
         with:
           ref: ${{ github.event.pull_request.head.sha }}
       - name: "Check Scala format"
-        continue-on-error: true
+        if: "!cancelled()"
         run: |
           nix develop -c bash -c 'mill -i gcd.checkFormat && mill -i elaborator.checkFormat'
       - name: "Check Rust format"
-        continue-on-error: true
+        if: "!cancelled()"
         run: |
           cd gcdemu
           nix develop -c cargo fmt --check
           cd ..
       - name: "Check nix format"
-        continue-on-error: true
+        if: "!cancelled()"
         run: |
           nix fmt -- --check nix flake.nix
-

@@ -3,8 +3,8 @@ use std::ffi::{c_char, CString};
 use std::sync::Mutex;
 
 use crate::drive::Driver;
+use crate::plusarg::PlusArgMatcher;
 use crate::GcdArgs;
-use clap::Parser;
 use num_bigint::BigUint;
 use svdpi::sys::dpi::{svBitVecVal, svLogic};
 use svdpi::SvScope;
@@ -64,7 +64,8 @@ unsafe fn fill_test_payload(dst: *mut SvBitVecVal, data_width: u64, payload: &Te
 
 #[no_mangle]
 unsafe extern "C" fn gcd_init() {
-    let args = GcdArgs::parse();
+    let plusargs = PlusArgMatcher::from_args();
+    let args = GcdArgs::from_plusargs(&plusargs);
     args.setup_logger().unwrap();
     let scope = SvScope::get_current().expect("failed to get scope in gcd_init");
     let driver = Box::new(Driver::new(scope, &args));
