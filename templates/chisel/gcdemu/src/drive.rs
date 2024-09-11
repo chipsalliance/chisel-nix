@@ -107,8 +107,8 @@ impl Driver {
             WATCHDOG_FINISH
         } else if tick - self.last_input_cycle > self.timeout {
             error!(
-                "[{}] watchdog timeout, last input tick = {}",
-                tick, self.last_input_cycle
+                "[{}] watchdog timeout, last input tick = {}, {} tests completed",
+                tick, self.last_input_cycle, self.test_num
             );
             WATCHDOG_TIMEOUT
         } else {

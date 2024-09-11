@@ -1,7 +1,17 @@
 .bloop
+.bsp
+.jvm-opts
+.mill-jvm-opts
 .metals/
 .vscode/
+
 out/
 result*
+gcd-sim-result/
 /dependencies/
 target/
+
+*.vcd
+*.fst
+*.fsdb
+*.log

@@ -1,9 +1,19 @@
 # SPDX-License-Identifier: Apache-2.0
 # SPDX-FileCopyrightText: 2024 Jiuyang Liu <liu@jiuyang.me>
 
-{ lib, bash, stdenv, rtl, dpi-lib, vcs-fhs-env }:
-let binName = "gcd-vcs-simulator";
-in stdenv.mkDerivation {
+{ lib
+, bash
+, stdenv
+, rtl
+, dpi-lib
+, vcs-fhs-env
+, runCommand
+}:
+
+let
+  binName = "gcd-vcs-simulator";
+in
+stdenv.mkDerivation (finalAttr: {
   name = "vcs";
 
   # Add "sandbox = relaxed" into /etc/nix/nix.conf, and run `systemctl restart nix-daemon`
@@ -14,6 +24,8 @@ in stdenv.mkDerivation {
   dontPatchELF = true;
 
   src = rtl;
+
+  meta.mainProgram = binName;
 
   buildPhase = ''
     runHook preBuild
@@ -44,6 +56,15 @@ in stdenv.mkDerivation {
     inherit vcs-fhs-env;
     inherit dpi-lib;
     inherit rtl;
+
+    tests.simple-sim = runCommand "${binName}-test" { __noChroot = true; } ''
+      export GCD_SIM_RESULT_DIR="$(mktemp -d)"
+      export DATA_ONLY=1
+      ${finalAttr.finalPackage}/bin/${binName}
+
+      mkdir -p "$out"
+      cp -vr "$GCD_SIM_RESULT_DIR"/result/* "$out/"
+    '';
   };
 
   shellHook = ''
@@ -58,15 +79,14 @@ in stdenv.mkDerivation {
     cp ${binName} $out/lib
     cp -r ${binName}.daidir $out/lib
 
-    # We need to carefully handle string escape here, so don't use makeWrapper
-    tee $out/bin/${binName} <<EOF
-    #!${bash}/bin/bash
-    export LD_LIBRARY_PATH="$out/lib/${binName}.daidir:\$LD_LIBRARY_PATH"
-    _argv="\$@"
-    ${vcs-fhs-env}/bin/vcs-fhs-env -c "$out/lib/${binName} \$_argv"
-    EOF
+    substitute ${./vcs-wrapper.sh} $out/bin/${binName} \
+      --subst-var-by shell "${bash}/bin/bash" \
+      --subst-var-by dateBin "$(command -v date)" \
+      --subst-var-by vcsSimBin "$out/lib/${binName}" \
+      --subst-var-by vcsSimDaidir "$out/lib/${binName}.daidir" \
+      --subst-var-by vcsFhsEnv "${vcs-fhs-env}/bin/vcs-fhs-env"
     chmod +x $out/bin/${binName}
 
     runHook postInstall
   '';
-}
+})

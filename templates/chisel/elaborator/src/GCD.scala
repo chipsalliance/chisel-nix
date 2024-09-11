@@ -11,6 +11,8 @@ object GCDMain extends Elaborator {
   case class GCDParameterMain(
     @arg(name = "xLen") xLen:                   Int,
     @arg(name = "useAsyncReset") useAsyncReset: Boolean) {
+    require(xLen > 0, "xLen must be a non-negative integer")
+    require(chisel3.util.isPow2(xLen), "xLen must be a power of 2")
     def convert: GCDParameter = GCDParameter(xLen, useAsyncReset)
   }
 
