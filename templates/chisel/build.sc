@@ -37,7 +37,7 @@ trait GCD extends millbuild.common.HasChisel with ScalafmtModule {
 }
 
 object elaborator extends Elaborator
-trait Elaborator extends millbuild.common.ElaboratorModule {
+trait Elaborator extends millbuild.common.ElaboratorModule with ScalafmtModule {
   def scalaVersion = T(deps.scalaVer)
 
   def panamaconverterModule = panamaconverter
