@@ -9,11 +9,11 @@ import org.chipsalliance.gcd.elaborator.Elaborator
 object GCDMain extends Elaborator {
   @main
   case class GCDParameterMain(
-    @arg(name = "xLen") xLen:                   Int,
+    @arg(name = "width") width:                 Int,
     @arg(name = "useAsyncReset") useAsyncReset: Boolean) {
-    require(xLen > 0, "xLen must be a non-negative integer")
-    require(chisel3.util.isPow2(xLen), "xLen must be a power of 2")
-    def convert: GCDParameter = GCDParameter(xLen, useAsyncReset)
+    require(width > 0, "width must be a non-negative integer")
+    require(chisel3.util.isPow2(width), "width must be a power of 2")
+    def convert: GCDParameter = GCDParameter(width, useAsyncReset)
   }
 
   implicit def GCDParameterMainParser: ParserForClass[GCDParameterMain] =
