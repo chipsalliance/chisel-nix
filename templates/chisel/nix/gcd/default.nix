@@ -6,6 +6,7 @@ lib.makeScope newScope (scope:
 let
   designTarget = "GCD";
   tbTarget = "GCDTestBench";
+  formalTarget = "GCDFormal";
   dpiLibName = "gcdemu";
 in
 {
@@ -48,6 +49,15 @@ in
   vcs-trace = scope.vcs.override {
     dpi-lib = scope.vcs.dpi-lib.override { enable-trace = true; };
   };
+
+  # Formal
+  formal-compiled = scope.callPackage ./gcd.nix { target = formalTarget; };
+  formal-elaborate = scope.callPackage ./elaborate.nix {
+    elaborator = scope.formal-compiled.elaborator;
+  };
+  formal-mlirbc =
+    scope.callPackage ./mlirbc.nix { elaborate = scope.formal-elaborate; };
+  formal-rtl = scope.callPackage ./rtl.nix { mlirbc = scope.formal-mlirbc; };
 
   # TODO: designConfig should be read from OM
   tbConfig = with builtins;
