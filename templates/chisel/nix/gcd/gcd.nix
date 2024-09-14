@@ -75,7 +75,10 @@ let
       projectDependencies.setupHook
     ];
 
-    env.CIRCT_INSTALL_PATH = circt-full;
+    env = {
+      CIRCT_INSTALL_PATH = circt-full;
+      JEXTRACT_INSTALL_PATH = jextract-21;
+    };
 
     outputs = [ "out" "elaborator" ];
 
