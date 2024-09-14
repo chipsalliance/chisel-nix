@@ -59,10 +59,10 @@ buildFHSEnv {
     sqlite
     nssmdns
     (libkrb5.overrideAttrs rec {
-      version = "1.18.2";
+      version = "1.21.3";
       src = fetchurl {
         url = "https://kerberos.org/dist/krb5/${lib.versions.majorMinor version}/krb5-${version}.tar.gz";
-        hash = "sha256-xuTJ7BqYFBw/XWbd8aE1VJBQyfq06aRiDumyIIWHOuA=";
+        hash = "sha256-t6TNXq1n+wi5gLIavRUP9yF+heoyDJ7QxtrdMEhArTU=";
       };
       sourceRoot = "krb5-${version}/src";
     })
