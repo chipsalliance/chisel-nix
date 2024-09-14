@@ -3,6 +3,7 @@ on:
   schedule:
     # Run this job everyday at 5:30 AM UTC+8
     - cron:  '30 21 * * *'
+  workflow_dispatch:
 
 jobs:
   bump-deps:
@@ -54,6 +55,7 @@ jobs:
           git checkout -b "$branch"
 
           git add 'nix/pkgs/dependencies'
+          git add 'nix/gcd/gcd.nix'
           git add 'flake.lock'
 
           if ! git diff --quiet --cached --exit-code; then
