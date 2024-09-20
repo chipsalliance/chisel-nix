@@ -21,6 +21,14 @@ final: prev: {
     assert final.lib.assertMsg (final.snpslmdLicenseFile != "")
       "You forget to set SNPSLMD_LICENSE_FILE or the '--impure' flag";
     final.callPackage ./pkgs/vcs-fhs-env.nix { };
+  jasperHome = builtins.getEnv "JASPER_HOME";
+  cdsLicenseFile = builtins.getEnv "CDS_LIC_FILE";
+  cds-fhs-env = assert final.lib.assertMsg (final.jasperHome != "")
+    "You forget to set JASPER_HOME or the '--impure' flag";
+    assert final.lib.assertMsg (final.cdsLicenseFile != "")
+      "You forget to set CDS_LIC_FILE or the '--impure' flag";
+    final.callPackage ./pkgs/cds-fhs-env.nix { };
+
 
   projectDependencies = final.callPackage ./pkgs/project-dependencies.nix { };
 
