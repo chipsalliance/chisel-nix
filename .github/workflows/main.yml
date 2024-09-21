@@ -73,3 +73,25 @@ jobs:
       - name: "Run verilator"
         run: |
           nix run '.#gcd.verilated'
+
+  run-formal-verification:
+    name: "Run Formal Verification"
+    strategy:
+      fail-fast: false
+    runs-on: [self-hosted, linux, nixos]
+    defaults:
+      run:
+        working-directory: ./templates/chisel
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+      - name: "Build formal rtl"
+        run: |
+          nix run '.#gcd.formal-rtl'
+      - name: "Build formal environment"
+        run: |
+          nix run '.#cds-fhs-env' --impure
+      - name: "Run formal verification"
+        run: |
+          jg -batch ./scripts/formal/FPV.tcl
