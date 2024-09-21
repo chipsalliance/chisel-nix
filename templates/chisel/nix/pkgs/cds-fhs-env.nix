@@ -23,6 +23,7 @@ lockedPkgs.buildFHSEnv {
     [ ! -d "${jasperHome}"  ] && echo "JASPER_HOME not accessible" && exit 1
     [ -z "${cdsLicenseFile}"  ] && echo "env CDS_LIC_FILE not set" && exit 1
     export JASPER_HOME=${jasperHome}
+    export CDS_LIC_FILE=${cdsLicenseFile}
     export PATH=$JASPER_HOME/bin:$PATH
     export _oldCdsEnvPath="$PATH"
     preHook() {
