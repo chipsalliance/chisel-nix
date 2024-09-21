@@ -86,12 +86,6 @@ jobs:
       - uses: actions/checkout@v4
         with:
           ref: ${{ github.event.pull_request.head.sha }}
-      - name: "Build formal rtl"
+      - name: "Run Formal Verification"
         run: |
-          nix run '.#gcd.formal-rtl'
-      - name: "Build formal environment"
-        run: |
-          nix run '.#cds-fhs-env' --impure
-      - name: "Run formal verification"
-        run: |
-          jg -batch ./scripts/formal/FPV.tcl
+          nix build '.#gcd.formal' --impure

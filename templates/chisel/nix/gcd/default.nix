@@ -57,12 +57,11 @@ in
   };
   formal-mlirbc =
     scope.callPackage ./mlirbc.nix { elaborate = scope.formal-elaborate; };
-  formal-rtl = scope.callPackage ./rtl.nix { mlirbc = scope.formal-mlirbc; };
+  formal-rtl = scope.callPackage ./rtl.nix {
+    mlirbc = scope.formal-mlirbc;
+  };
   formal = scope.callPackage ./formal.nix {
-    rtl = scope.formal-rtl.override {
-      enable-layers =
-        [ "Verification" "Verification.Assert" "Verification.Cover" ];
-    };
+    rtl = scope.formal-rtl;
   };
 
   # TODO: designConfig should be read from OM

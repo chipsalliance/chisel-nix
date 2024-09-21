@@ -4,7 +4,7 @@
 clear -all
 
 # Analyze design under verification files
-set RESULT_PATH ./result
+set RESULT_PATH .
 
 # Analyze source files and property files
 analyze -sv12 \
@@ -26,18 +26,14 @@ get_design_info
 set_max_trace_length 100
 prove -all
 
-# Report proof results
-report
+report -file report.txt
 
-# Set exit code for ci, should only in batch mode
-
-# report -file report.txt
-# set failed_properties [get_property_list -include {status {cex unreachable}}]
-# set length [llength $failed_properties]
-# if { $length > 0 } {
-#   puts "There are $length failed properties!"
-#   exit 1
-# } else {
-#   puts "All properties passed!"
-#   exit 0
-# }
+set failed_properties [get_property_list -include {status {cex unreachable}}]
+set length [llength $failed_properties]
+if { $length > 0 } {
+  puts "There are $length failed properties!"
+  exit 1
+} else {
+  puts "All properties passed!"
+  exit 0
+}
