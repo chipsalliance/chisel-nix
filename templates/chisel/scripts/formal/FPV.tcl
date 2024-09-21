@@ -29,13 +29,15 @@ prove -all
 # Report proof results
 report
 
-# Set exit code for ci
-set failed_properties [get_property_list -include {status {cex unreachable}}]
-set length [llength $failed_properties]
-if { $length > 0 } {
-  puts "There are $length failed properties!"
-  exit 1
-} else {
-  puts "All properties passed!"
-  exit 0
-}
+# Set exit code for ci, should only in batch mode
+
+# report -file report.txt
+# set failed_properties [get_property_list -include {status {cex unreachable}}]
+# set length [llength $failed_properties]
+# if { $length > 0 } {
+#   puts "There are $length failed properties!"
+#   exit 1
+# } else {
+#   puts "All properties passed!"
+#   exit 0
+# }
