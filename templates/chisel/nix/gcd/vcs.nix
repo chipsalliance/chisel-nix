@@ -79,7 +79,7 @@ stdenv.mkDerivation (finalAttr: {
     cp ${binName} $out/lib
     cp -r ${binName}.daidir $out/lib
 
-    substitute ${./vcs-wrapper.sh} $out/bin/${binName} \
+    substitute ${./scripts/vcs-wrapper.sh} $out/bin/${binName} \
       --subst-var-by shell "${bash}/bin/bash" \
       --subst-var-by dateBin "$(command -v date)" \
       --subst-var-by vcsSimBin "$out/lib/${binName}" \
