@@ -7,7 +7,7 @@
 }:
 
 stdenvNoCC.mkDerivation {
-  name = "formal";
+  name = "jg-fpv";
 
   # Add "sandbox = relaxed" into /etc/nix/nix.conf, and run `systemctl restart nix-daemon`
   #

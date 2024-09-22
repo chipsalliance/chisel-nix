@@ -88,4 +88,4 @@ jobs:
           ref: ${{ github.event.pull_request.head.sha }}
       - name: "Run Formal Verification"
         run: |
-          nix build '.#gcd.formal' --impure
+          nix build '.#gcd.jg-fpv' --impure

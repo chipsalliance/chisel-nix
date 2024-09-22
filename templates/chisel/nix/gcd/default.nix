@@ -60,7 +60,7 @@ in
   formal-rtl = scope.callPackage ./rtl.nix {
     mlirbc = scope.formal-mlirbc;
   };
-  formal = scope.callPackage ./formal.nix {
+  jg-fpv = scope.callPackage ./jg-fpv.nix {
     rtl = scope.formal-rtl;
   };
 
