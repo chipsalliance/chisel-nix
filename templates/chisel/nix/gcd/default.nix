@@ -66,7 +66,7 @@ in
 
   # TODO: designConfig should be read from OM
   tbConfig = with builtins;
-    fromJSON (readFile ./../../configs/${tbTarget}Main.json);
+    fromJSON (readFile ./../../configs/${tbTarget}.json);
 
 })
 

@@ -4,9 +4,16 @@ package org.chipsalliance.gcd.elaborator
 
 import mainargs._
 import org.chipsalliance.gcd.{GCD, GCDParameter}
-import org.chipsalliance.gcd.elaborator.Elaborator
+import chisel3.experimental.util.SerializableModuleElaborator
 
-object GCDMain extends Elaborator {
+object GCDMain extends SerializableModuleElaborator {
+  val topName = "GCD"
+
+  implicit object PathRead extends TokensReader.Simple[os.Path] {
+    def shortName = "path"
+    def read(strs: Seq[String]) = Right(os.Path(strs.head, os.pwd))
+  }
+
   @main
   case class GCDParameterMain(
     @arg(name = "width") width:                 Int,
@@ -20,17 +27,21 @@ object GCDMain extends Elaborator {
     ParserForClass[GCDParameterMain]
 
   @main
-  def config(@arg(name = "parameter") parameter: GCDParameterMain) = configImpl(
-    parameter.convert
-  )
+  def config(
+    @arg(name = "parameter") parameter:  GCDParameterMain,
+    @arg(name = "target-dir") targetDir: os.Path = os.pwd
+  ) =
+    os.write.over(targetDir / s"${topName}.json", configImpl(parameter.convert))
 
   @main
   def design(
-    @arg(name = "parameter") parameter:    os.Path,
-    @arg(name = "run-firtool") runFirtool: mainargs.Flag,
-    @arg(name = "target-dir") targetDir:   os.Path
-  ) =
-    designImpl[GCD, GCDParameter](parameter, runFirtool.value, targetDir)
+    @arg(name = "parameter") parameter:  os.Path,
+    @arg(name = "target-dir") targetDir: os.Path = os.pwd
+  ) = {
+    val (firrtl, annos) = designImpl[GCD, GCDParameter](os.read.stream(parameter))
+    os.write.over(targetDir / s"${topName}.fir", firrtl)
+    os.write.over(targetDir / s"${topName}.anno.json", annos)
+  }
 
   def main(args: Array[String]): Unit = ParserForMethods(this).runOrExit(args)
 }
