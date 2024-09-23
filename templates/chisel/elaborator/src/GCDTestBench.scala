@@ -4,10 +4,17 @@ package org.chipsalliance.gcd.elaborator
 
 import mainargs._
 import org.chipsalliance.gcd.{GCDTestBench, GCDTestBenchParameter, TestVerbatimParameter}
-import org.chipsalliance.gcd.elaborator.Elaborator
 import org.chipsalliance.gcd.elaborator.GCDMain.GCDParameterMain
+import chisel3.experimental.util.SerializableModuleElaborator
 
-object GCDTestBenchMain extends Elaborator {
+object GCDTestBenchMain extends SerializableModuleElaborator {
+  val topName = "GCDTestBench"
+
+  implicit object PathRead extends TokensReader.Simple[os.Path] {
+    def shortName = "path"
+    def read(strs: Seq[String]) = Right(os.Path(strs.head, os.pwd))
+  }
+
   @main
   case class GCDTestBenchParameterMain(
     @arg(name = "testVerbatimParameter") testVerbatimParameter: TestVerbatimParameterMain,
@@ -47,16 +54,21 @@ object GCDTestBenchMain extends Elaborator {
     ParserForClass[GCDTestBenchParameterMain]
 
   @main
-  def config(@arg(name = "parameter") parameter: GCDTestBenchParameterMain) =
-    configImpl(parameter.convert)
+  def config(
+    @arg(name = "parameter") parameter:  GCDTestBenchParameterMain,
+    @arg(name = "target-dir") targetDir: os.Path = os.pwd
+  ) =
+    os.write.over(targetDir / s"${topName}.json", configImpl(parameter.convert))
 
   @main
   def design(
-    @arg(name = "parameter") parameter:    os.Path,
-    @arg(name = "run-firtool") runFirtool: mainargs.Flag,
-    @arg(name = "target-dir") targetDir:   os.Path
-  ) =
-    designImpl[GCDTestBench, GCDTestBenchParameter](parameter, runFirtool.value, targetDir)
+    @arg(name = "parameter") parameter:  os.Path,
+    @arg(name = "target-dir") targetDir: os.Path = os.pwd
+  ) = {
+    val (firrtl, annos) = designImpl[GCDTestBench, GCDTestBenchParameter](os.read.stream(parameter))
+    os.write.over(targetDir / s"${topName}.fir", firrtl)
+    os.write.over(targetDir / s"${topName}.anno.json", annos)
+  }
 
   def main(args: Array[String]): Unit = ParserForMethods(this).runOrExit(args)
 }
