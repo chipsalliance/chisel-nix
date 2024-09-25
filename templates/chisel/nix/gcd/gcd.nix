@@ -13,7 +13,6 @@
 , circt-full
 , jextract-21
 , add-determinism
-
 , projectDependencies
 
 , target
@@ -44,7 +43,7 @@ let
             root = ./../..;
             fileset = unions [ ./../../build.sc ./../../common.sc ];
           };
-        millDepsHash = "sha256-1PbMBE6VIVCahRUu8gqDPRdW1t0GMWoWbuDfg8HL7A4=";
+        millDepsHash = "sha256-+wfEF4JGRRjPfTue9coK82UzHTsfQvVfuRPQXoZXEag=";
         nativeBuildInputs = [ projectDependencies.setupHook ];
       };
 

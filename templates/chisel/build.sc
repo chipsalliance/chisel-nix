@@ -13,7 +13,7 @@ import $file.dependencies.chisel.build
 import $file.common
 
 object deps {
-  val scalaVer = "2.13.14"
+  val scalaVer = "2.13.15"
   val mainargs = ivy"com.lihaoyi::mainargs:0.5.0"
   val oslib = ivy"com.lihaoyi::os-lib:0.9.1"
   val upickle = ivy"com.lihaoyi::upickle:3.3.1"
