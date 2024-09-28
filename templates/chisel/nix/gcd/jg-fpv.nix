@@ -43,6 +43,7 @@ stdenvNoCC.mkDerivation {
     mkdir -p $out
     
     cp report.txt $out
+    cp failed_num $out
     cp -r jgproject $out
 
     runHook postInstall
