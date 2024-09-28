@@ -124,6 +124,29 @@ To format the Scala code, developers can run:
 nix develop -c bash -c 'mill -i gcd.reformat && mill -i elaborator.reformat'
 ```
 
+### Bump dependencies
+
+To bump nixpkgs, run:
+
+```bash
+nix flake update 
+```
+
+To bump Chisel and other dependencies fetched by nvfetcher, run:
+
+```bash
+cd nix/pkgs/dependencies
+nix run '.#nvfetcher'
+```
+
+To bump mill dependencies, run:
+
+```bash
+nix build '.#gcd.gcd-compiled.millDeps' --rebuild
+```
+
+and Then update `millDepsHash` in `nix/gcd/gcd.nix`
+
 ### Use the fetchMillDeps function
 
 Fetch project dependencies for later offline usage.
