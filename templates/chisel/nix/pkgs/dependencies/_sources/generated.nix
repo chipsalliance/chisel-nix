@@ -3,13 +3,13 @@
 {
   chisel = {
     pname = "chisel";
-    version = "b5cf7b064a8435f7e0694437d08184981e7170a2";
+    version = "5e6831550be1df910f239fc7dede95ccc2f686c3";
     src = fetchFromGitHub {
       owner = "chipsalliance";
       repo = "chisel";
-      rev = "b5cf7b064a8435f7e0694437d08184981e7170a2";
+      rev = "5e6831550be1df910f239fc7dede95ccc2f686c3";
       fetchSubmodules = false;
-      sha256 = "sha256-E2QjBmWnNlQJpJXp+FIhvDpBdqrPdTlTXyu2uIL6gy4=";
+      sha256 = "sha256-M0xiSh3Rkgrx2yc98Ah8uHUZWWculGSoAsirllMqsu4=";
     };
     date = "2024-09-30";
   };
