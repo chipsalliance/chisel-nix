@@ -59,6 +59,7 @@ in
     scope.callPackage ./mlirbc.nix { elaborate = scope.formal-elaborate; };
   formal-rtl = scope.callPackage ./rtl.nix {
     mlirbc = scope.formal-mlirbc;
+    enable-layers = [ "Verification" "Verification.Assume" "Verification.Assert" "Verification.Cover" ];
   };
   jg-fpv = scope.callPackage ./jg-fpv.nix {
     rtl = scope.formal-rtl;
