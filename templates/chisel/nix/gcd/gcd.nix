@@ -6,6 +6,7 @@
 , fetchMillDeps
 , makeWrapper
 , jdk21
+, git
 
   # chisel deps
 , mill
@@ -67,6 +68,7 @@ let
       jextract-21
       add-determinism
       espresso
+      git
 
       makeWrapper
       passthru.millDeps.setupHook
