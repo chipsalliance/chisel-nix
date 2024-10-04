@@ -46,7 +46,6 @@ class GCDFormal(val parameter: GCDFormalParameter)
     with SerializableModule[GCDFormalParameter]
     with ImplicitClock
     with ImplicitReset {
-  layer.enable(layers.Verification)
   override protected def implicitClock: Clock = io.clock
   override protected def implicitReset: Reset = io.reset
   // Instantiate DUT.

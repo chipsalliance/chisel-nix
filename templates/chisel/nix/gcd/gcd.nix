@@ -6,6 +6,7 @@
 , fetchMillDeps
 , makeWrapper
 , jdk21
+, git
 
   # chisel deps
 , mill
@@ -43,7 +44,7 @@ let
             root = ./../..;
             fileset = unions [ ./../../build.sc ./../../common.sc ];
           };
-        millDepsHash = "sha256-+wfEF4JGRRjPfTue9coK82UzHTsfQvVfuRPQXoZXEag=";
+        millDepsHash = "sha256-5VTgJ1JaIxP3wk/WsFj+W1VGFE2xoPKu3XbmTVOvMdk=";
         nativeBuildInputs = [ projectDependencies.setupHook ];
       };
 
@@ -67,6 +68,7 @@ let
       jextract-21
       add-determinism
       espresso
+      git
 
       makeWrapper
       passthru.millDeps.setupHook
