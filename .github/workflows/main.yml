@@ -74,8 +74,8 @@ jobs:
         run: |
           nix run '.#gcd.verilated'
 
-  run-formal-verification:
-    name: "Run Formal Verification"
+  run-jg-fpv:
+    name: "Run JasperGold FPV"
     strategy:
       fail-fast: false
     runs-on: [self-hosted, linux, nixos]
@@ -86,6 +86,6 @@ jobs:
       - uses: actions/checkout@v4
         with:
           ref: ${{ github.event.pull_request.head.sha }}
-      - name: "Run Formal Verification"
+      - name: "Run JasperGold FPV"
         run: |
-          nix build '.#gcd.jg-fpv' --impure && $(exit $(cat result/failed_num))
+          nix build '.#gcd.jg-fpv' --impure && cat result/report.txt && $(exit $(cat result/failed_num))
