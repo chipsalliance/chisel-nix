@@ -16,7 +16,6 @@ _VCS_COV_DIR=@vcsCovDir@
 _NOW=$("$_DATE_BIN" "+%Y-%m-%d-%H-%M-%S")
 _GCD_SIM_RESULT_DIR=${GCD_SIM_RESULT_DIR:-"gcd-sim-result"}
 _CURRENT="$_GCD_SIM_RESULT_DIR"/all/"$_NOW"
-_CM_ARG=""
 mkdir -p "$_CURRENT"
 ln -sfn "all/$_NOW" "$_GCD_SIM_RESULT_DIR/result"
 
