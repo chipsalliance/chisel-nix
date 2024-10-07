@@ -8,10 +8,12 @@
 , dpi-lib
 , vcs-fhs-env
 , runCommand
+, enableCover ? true
 }:
 
 let
   binName = "gcd-vcs-simulator";
+  coverageName = "coverage.vdb";
 in
 stdenv.mkDerivation (finalAttr: {
   name = "vcs";
@@ -41,10 +43,15 @@ stdenv.mkDerivation (finalAttr: {
       ${
         lib.optionalString dpi-lib.enable-trace ''
           -debug_access+pp+dmptf+thread \
-          -kdb=common_elab,hgldd_all''
+          -kdb=common_elab,hgldd_all \
+          -assert enable_diag ''
+      } \
+      ${
+        lib.optionalString enableCover ''
+          -cm line+cond+fsm+tgl+branch+assert \
+          -cm_dir ${coverageName} ''
       } \
       -file filelist.f \
-      -assert enable_diag \
       ${dpi-lib}/lib/${dpi-lib.libOutName} \
       -o ${binName}
 
@@ -79,11 +86,18 @@ stdenv.mkDerivation (finalAttr: {
     cp ${binName} $out/lib
     cp -r ${binName}.daidir $out/lib
 
+    ${
+      lib.optionalString enableCover ''
+      cp -r ${coverageName} $out/lib''
+    } \
+
     substitute ${./scripts/vcs-wrapper.sh} $out/bin/${binName} \
+      --subst-var-by lib "$out/lib" \
       --subst-var-by shell "${bash}/bin/bash" \
       --subst-var-by dateBin "$(command -v date)" \
       --subst-var-by vcsSimBin "$out/lib/${binName}" \
       --subst-var-by vcsSimDaidir "$out/lib/${binName}.daidir" \
+      --subst-var-by vcsCovDir "${lib.optionalString enableCover "${coverageName}"}" \
       --subst-var-by vcsFhsEnv "${vcs-fhs-env}/bin/vcs-fhs-env"
     chmod +x $out/bin/${binName}
 
