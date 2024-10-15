@@ -24,25 +24,25 @@ cp -r "$_VCS_SIM_DAIDIR" "$_CURRENT/"
 
 if [ -n "$_VCS_COV_DIR" ]; then
   cp -vr "$_LIB/$_VCS_COV_DIR" "$_CURRENT/"
-  _CM_ARG="-cm assert -cm_dir $_CURRENT/$_VCS_COV_DIR"
+  _CM_ARG="-cm assert -cm_dir ./$_VCS_COV_DIR" # vcs runs in $_CURRENT
 fi
 
 chmod -R +w "$_CURRENT"
+pushd "$_CURRENT" >/dev/null
 
 _emu_name=$(basename "$_VCS_SIM_BIN")
 _daidir=$(basename "$_VCS_SIM_DAIDIR")
 
-export LD_LIBRARY_PATH="$_CURRENT/$_daidir:$LD_LIBRARY_PATH"
+export LD_LIBRARY_PATH="$PWD/$_daidir:$LD_LIBRARY_PATH"
 
-"$_VCS_FHS_ENV" -c "$_CURRENT/$_emu_name $_CM_ARG $_EXTRA_ARGS" &> >(tee $_CURRENT/vcs-emu-journal.log)
+"$_VCS_FHS_ENV" -c "./$_emu_name $_CM_ARG $_EXTRA_ARGS" &> >(tee $./vcs-emu-journal.log)
 
 if [ -n "$_VCS_COV_DIR" ]; then
-  "$_VCS_FHS_ENV" -c "urg -dir "$_CURRENT/$_VCS_COV_DIR" -format text"
-  cp -vr ./urgReport "$_CURRENT/"
+  "$_VCS_FHS_ENV" -c "urg -dir "./$_VCS_COV_DIR" -format text"
 fi
 
 if ((${DATA_ONLY:-0})); then
-  rm -f "$_CURRENT/$_emu_name"
+  rm -f "./$_emu_name"
 fi
 
 set -e _emu_name _daidir
