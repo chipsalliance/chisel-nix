@@ -56,6 +56,7 @@ let
       });
 
       inherit target;
+      inherit env;
     };
 
     shellHook = ''

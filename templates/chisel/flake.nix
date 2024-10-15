@@ -29,6 +29,6 @@
           nativeBuildInputs = [ pkgs.cargo pkgs.rustfmt pkgs.rust-analyzer ];
           RUST_SRC_PATH =
             "${pkgs.rust.packages.stable.rustPlatform.rustLibSrc}";
-        } // pkgs.gcd.tb-dpi-lib.env);
+        } // pkgs.gcd.tb-dpi-lib.env // pkgs.gcd.gcd-compiled.env);
       });
 }
