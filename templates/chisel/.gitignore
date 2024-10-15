@@ -4,6 +4,8 @@
 .mill-jvm-opts
 .metals/
 .vscode/
+.envrc
+.direnv/
 
 out/
 result*
