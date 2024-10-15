@@ -70,5 +70,5 @@ object GCDTestBenchMain extends SerializableModuleElaborator {
     os.write.over(targetDir / s"${topName}.anno.json", annos)
   }
 
-  def main(args: Array[String]): Unit = ParserForMethods(this).runOrExit(args)
+  def main(args: Array[String]): Unit = ParserForMethods(this).runOrExit(args.toIndexedSeq)
 }
