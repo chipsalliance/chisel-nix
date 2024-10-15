@@ -13,7 +13,14 @@ trait HasChisel extends ScalaModule {
   def chiselPluginJar: T[Option[PathRef]]
 
   override def scalacOptions = T(
-    super.scalacOptions() ++ chiselPluginJar().map(path => s"-Xplugin:${path.path}") ++ Seq("-Ymacro-annotations")
+    super.scalacOptions() ++ chiselPluginJar().map(path => s"-Xplugin:${path.path}") ++ Seq(
+      "-Ymacro-annotations",
+      "-deprecation",
+      "-feature",
+      "-language:reflectiveCalls",
+      "-language:existentials",
+      "-language:implicitConversions"
+    )
   )
 
   override def scalacPluginClasspath: T[Agg[PathRef]] = T(super.scalacPluginClasspath() ++ chiselPluginJar())
