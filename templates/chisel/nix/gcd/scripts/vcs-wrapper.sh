@@ -35,7 +35,7 @@ _daidir=$(basename "$_VCS_SIM_DAIDIR")
 
 export LD_LIBRARY_PATH="$PWD/$_daidir:$LD_LIBRARY_PATH"
 
-"$_VCS_FHS_ENV" -c "./$_emu_name $_CM_ARG $_EXTRA_ARGS" &> >(tee $./vcs-emu-journal.log)
+"$_VCS_FHS_ENV" -c "./$_emu_name $_CM_ARG $_EXTRA_ARGS" &> >(tee ./vcs-emu-journal.log)
 
 if [ -n "$_VCS_COV_DIR" ]; then
   "$_VCS_FHS_ENV" -c "urg -dir "./$_VCS_COV_DIR" -format text"
