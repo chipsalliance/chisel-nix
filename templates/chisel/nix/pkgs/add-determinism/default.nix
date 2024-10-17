@@ -17,13 +17,13 @@ let
 in
 rustPlatform.buildRustPackage {
   pname = "add-determinism";
-  version = "unstable-2024-05-11";
+  version = "unstable-2024-10-17";
 
   src = fetchFromGitHub {
     owner = "keszybz";
     repo = "add-determinism";
-    rev = "f27f0ac8899876d0e3ad36cd4450f51bf6fa3195";
-    hash = "sha256-a4PIiQ9T4cTUv7Y4nMjJB+sWLBoOi4ptQF5ApgykO4Y=";
+    rev = "d3748ff2ee13d61aa913d7c1160e9e2274742bad";
+    hash = "sha256-IiIxUDYtq4Qcd9hTHsSqZEeETu5Vw3Gh6GxfArxBPG0=";
   };
 
   # this project has no Cargo.lock now
