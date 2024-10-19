@@ -13,10 +13,10 @@
             "name": null,
             "owner": "chipsalliance",
             "repo": "chisel",
-            "rev": "8c718b2b634a7b1aba3a4df54549a280042ba80a",
-            "sha256": "sha256-1pfQ2EXryl7RxZnNls8G4uUIKE1WxTwqSkCFzl1fOcs=",
+            "rev": "a7a68e522ccc71d08a0a0aaea0a1460d266f2d7f",
+            "sha256": "sha256-+njdHbPH6MpP6uIEliLTRyanJhCIWhnA2meJl8q1rso=",
             "type": "github"
         },
-        "version": "8c718b2b634a7b1aba3a4df54549a280042ba80a"
+        "version": "a7a68e522ccc71d08a0a0aaea0a1460d266f2d7f"
     }
 }
