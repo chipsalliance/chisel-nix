@@ -1,27 +1,29 @@
 # SPDX-License-Identifier: Apache-2.0
 # SPDX-FileCopyrightText: 2024 Jiuyang Liu <liu@jiuyang.me>
-{ jasperHome
-, cdsLicenseFile
+{ getEnv'
 , fetchFromGitHub
 }:
 let
   nixpkgsSrcs = fetchFromGitHub {
     owner = "NixOS";
     repo = "nixpkgs";
-    "rev" = "c374d94f1536013ca8e92341b540eba4c22f9c62";
-    "hash" = "sha256-Z/ELQhrSd7bMzTO8r7NZgi9g5emh+aRKoCdaAv5fiO0=";
+    rev = "c374d94f1536013ca8e92341b540eba4c22f9c62";
+    hash = "sha256-Z/ELQhrSd7bMzTO8r7NZgi9g5emh+aRKoCdaAv5fiO0=";
   };
 
   # The cds we have only support x86-64_linux
   lockedPkgs = import nixpkgsSrcs { system = "x86_64-linux"; };
+
+  jasperHome = getEnv' "JASPER_HOME";
+  cdsLicenseFile = getEnv' "CDS_LIC_FILE";
 in
 lockedPkgs.buildFHSEnv {
   name = "cds-fhs-env";
 
   profile = ''
-    [ ! -e "${jasperHome}"  ] && echo "env JASPER_HOME not set" && exit 1
-    [ ! -d "${jasperHome}"  ] && echo "JASPER_HOME not accessible" && exit 1
-    [ -z "${cdsLicenseFile}"  ] && echo "env CDS_LIC_FILE not set" && exit 1
+    [ ! -e "${jasperHome}"  ] && echo "env JASPER_HOME='${jasperHome}' points to unknown location" && exit 1
+    [ ! -d "${jasperHome}"  ] && echo "env JASPER_HOME='${jasperHome}' not accessible" && exit 1
+
     export JASPER_HOME=${jasperHome}
     export CDS_LIC_FILE=${cdsLicenseFile}
     export PATH=$JASPER_HOME/bin:$PATH
