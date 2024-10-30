@@ -24,7 +24,7 @@ case class GCDFormalParameter(gcdParameter: GCDParameter) extends SerializableMo
 
 @instantiable
 class GCDFormalOM(parameter: GCDFormalParameter) extends Class {
-  val gcd = IO(Output(Property[AnyClassType]()))
+  val gcd   = IO(Output(Property[AnyClassType]()))
   @public
   val gcdIn = IO(Input(Property[AnyClassType]()))
   gcd := gcdIn
@@ -37,7 +37,7 @@ class GCDFormalInterface(parameter: GCDFormalParameter) extends Bundle {
     val x = UInt(parameter.gcdParameter.width.W)
     val y = UInt(parameter.gcdParameter.width.W)
   }))
-  val om = Output(Property[AnyClassType]())
+  val om    = Output(Property[AnyClassType]())
 }
 
 @instantiable
@@ -46,13 +46,13 @@ class GCDFormal(val parameter: GCDFormalParameter)
     with SerializableModule[GCDFormalParameter]
     with ImplicitClock
     with ImplicitReset {
-  override protected def implicitClock: Clock = io.clock
-  override protected def implicitReset: Reset = io.reset
+  override protected def implicitClock: Clock         = io.clock
+  override protected def implicitReset: Reset         = io.reset
   // Instantiate DUT.
-  val dut: Instance[GCD] = Instantiate(new GCD(parameter.gcdParameter))
+  val dut:                              Instance[GCD] = Instantiate(new GCD(parameter.gcdParameter))
   // Instantiate OM
   val omInstance = Instantiate(new GCDFormalOM(parameter))
-  io.om := omInstance.getPropertyReference.asAnyClassType
+  io.om            := omInstance.getPropertyReference.asAnyClassType
   omInstance.gcdIn := dut.io.om
 
   dut.io.clock := implicitClock
@@ -66,7 +66,7 @@ class GCDFormal(val parameter: GCDFormalParameter)
   val outputNotFire: Sequence = !dut.io.output.valid
   val inputNotValid: Sequence = dut.io.input.ready && !dut.io.input.valid
 
-  dut.io.input.bits := io.input.bits
+  dut.io.input.bits  := io.input.bits
   dut.io.input.valid := io.input.valid
 
   AssumeProperty(
