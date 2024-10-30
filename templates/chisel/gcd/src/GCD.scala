@@ -26,23 +26,23 @@ class GCDProbe(parameter: GCDParameter) extends Bundle {
 /** Metadata of [[GCD]]. */
 @instantiable
 class GCDOM(parameter: GCDParameter) extends Class {
-  val width:         Property[Int] = IO(Output(Property[Int]()))
+  val width:         Property[Int]     = IO(Output(Property[Int]()))
   val useAsyncReset: Property[Boolean] = IO(Output(Property[Boolean]()))
-  width := Property(parameter.width)
+  width         := Property(parameter.width)
   useAsyncReset := Property(parameter.useAsyncReset)
 }
 
 /** Interface of [[GCD]]. */
 class GCDInterface(parameter: GCDParameter) extends Bundle {
-  val clock = Input(Clock())
-  val reset = Input(if (parameter.useAsyncReset) AsyncReset() else Bool())
-  val input = Flipped(DecoupledIO(new Bundle {
+  val clock  = Input(Clock())
+  val reset  = Input(if (parameter.useAsyncReset) AsyncReset() else Bool())
+  val input  = Flipped(DecoupledIO(new Bundle {
     val x = UInt(parameter.width.W)
     val y = UInt(parameter.width.W)
   }))
   val output = Valid(UInt(parameter.width.W))
-  val probe = Output(Probe(new GCDProbe(parameter), layers.Verification))
-  val om = Output(Property[AnyClassType]())
+  val probe  = Output(Probe(new GCDProbe(parameter), layers.Verification))
+  val om     = Output(Property[AnyClassType]())
 }
 
 /** Hardware Implementation of GCD */
@@ -59,18 +59,18 @@ class GCD(val parameter: GCDParameter)
   // Block X-state propagation
   val y: UInt = RegInit(chiselTypeOf(io.input.bits.x), 0.U)
   val startupFlag = RegInit(false.B)
-  val busy = y =/= 0.U
+  val busy        = y =/= 0.U
 
   when(x > y) { x := x - y }.otherwise { y := y - x }
 
   when(io.input.fire) {
-    x := io.input.bits.x
-    y := io.input.bits.y
+    x           := io.input.bits.x
+    y           := io.input.bits.y
     startupFlag := true.B
   }
 
-  io.input.ready := !busy
-  io.output.bits := x
+  io.input.ready  := !busy
+  io.output.bits  := x
   io.output.valid := startupFlag && !busy
 
   // Assign Probe

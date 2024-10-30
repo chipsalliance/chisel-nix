@@ -20,7 +20,7 @@ object GCDTestBenchMain extends SerializableModuleElaborator {
     @arg(name = "testVerbatimParameter") testVerbatimParameter: TestVerbatimParameterMain,
     @arg(name = "gcdParameter") gcdParameter:                   GCDParameterMain,
     @arg(name = "timeout") timeout:                             Int,
-    @arg(name = "testSize") testSize:                           Int) {
+    @arg(name = "testSize") testSize: Int) {
     def convert: GCDTestBenchParameter = GCDTestBenchParameter(
       testVerbatimParameter.convert,
       gcdParameter.convert,
@@ -34,7 +34,7 @@ object GCDTestBenchMain extends SerializableModuleElaborator {
     @arg(name = "initFunctionName") initFunctionName: String,
     @arg(name = "dumpFunctionName") dumpFunctionName: String,
     @arg(name = "clockFlipTick") clockFlipTick:       Int,
-    @arg(name = "resetFlipTick") resetFlipTick:       Int) {
+    @arg(name = "resetFlipTick") resetFlipTick: Int) {
     def convert: TestVerbatimParameter = TestVerbatimParameter(
       useAsyncReset:    Boolean,
       initFunctionName: String,

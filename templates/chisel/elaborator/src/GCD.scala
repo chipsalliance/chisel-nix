@@ -16,7 +16,7 @@ object GCDMain extends SerializableModuleElaborator {
 
   @main
   case class GCDParameterMain(
-    @arg(name = "width") width:                 Int,
+    @arg(name = "width") width: Int,
     @arg(name = "useAsyncReset") useAsyncReset: Boolean) {
     require(width > 0, "width must be a non-negative integer")
     require(chisel3.util.isPow2(width), "width must be a power of 2")

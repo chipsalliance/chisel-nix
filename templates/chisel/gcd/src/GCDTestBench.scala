@@ -33,7 +33,7 @@ case class GCDTestBenchParameter(
 
 @instantiable
 class GCDTestBenchOM(parameter: GCDTestBenchParameter) extends Class {
-  val gcd = IO(Output(Property[AnyClassType]()))
+  val gcd   = IO(Output(Property[AnyClassType]()))
   @public
   val gcdIn = IO(Input(Property[AnyClassType]()))
   gcd := gcdIn
@@ -48,18 +48,18 @@ class GCDTestBench(val parameter: GCDTestBenchParameter)
     extends FixedIORawModule(new GCDTestBenchInterface(parameter))
     with SerializableModule[GCDTestBenchParameter]
     with ImplicitClock
-    with ImplicitReset {
-  override protected def implicitClock: Clock = verbatim.io.clock
-  override protected def implicitReset: Reset = verbatim.io.reset
+    with ImplicitReset       {
+  override protected def implicitClock: Clock                  = verbatim.io.clock
+  override protected def implicitReset: Reset                  = verbatim.io.reset
   // Instantiate Drivers
-  val verbatim: Instance[TestVerbatim] = Instantiate(
+  val verbatim:                         Instance[TestVerbatim] = Instantiate(
     new TestVerbatim(parameter.testVerbatimParameter)
   )
   // Instantiate DUT.
-  val dut: Instance[GCD] = Instantiate(new GCD(parameter.gcdParameter))
+  val dut:                              Instance[GCD]          = Instantiate(new GCD(parameter.gcdParameter))
   // Instantiate OM
   val omInstance = Instantiate(new GCDTestBenchOM(parameter))
-  io.om := omInstance.getPropertyReference.asAnyClassType
+  io.om            := omInstance.getPropertyReference.asAnyClassType
   omInstance.gcdIn := dut.io.om
 
   dut.io.clock := implicitClock
@@ -70,13 +70,13 @@ class GCDTestBench(val parameter: GCDTestBenchParameter)
   simulationTime := simulationTime + 1.U
   // For each timeout ticks, check it
   val (_, callWatchdog) = Counter(true.B, parameter.timeout / 2)
-  val watchdogCode = RawUnclockedNonVoidFunctionCall("gcd_watchdog", UInt(8.W))(callWatchdog)
+  val watchdogCode      = RawUnclockedNonVoidFunctionCall("gcd_watchdog", UInt(8.W))(callWatchdog)
   when(watchdogCode =/= 0.U) {
     stop(cf"""{"event":"SimulationStop","reason": ${watchdogCode},"cycle":${simulationTime}}\n""")
   }
   class TestPayload extends Bundle {
-    val x = UInt(parameter.gcdParameter.width.W)
-    val y = UInt(parameter.gcdParameter.width.W)
+    val x      = UInt(parameter.gcdParameter.width.W)
+    val y      = UInt(parameter.gcdParameter.width.W)
     val result = UInt(parameter.gcdParameter.width.W)
   }
   val request =
@@ -86,10 +86,10 @@ class GCDTestBench(val parameter: GCDTestBenchParameter)
     )
   when(dut.io.input.ready) {
     dut.io.input.valid := request.valid
-    dut.io.input.bits := request.bits
+    dut.io.input.bits  := request.bits
   }.otherwise {
     dut.io.input.valid := false.B;
-    dut.io.input.bits := DontCare;
+    dut.io.input.bits  := DontCare;
   }
 
   // LTL Checker
@@ -98,7 +98,7 @@ class GCDTestBench(val parameter: GCDTestBenchParameter)
   val inputNotFire:      Sequence = !dut.io.input.fire
   val outputFire:        Sequence = dut.io.output.valid
   val outputNotFire:     Sequence = !dut.io.output.valid
-  val lastRequestResult: UInt = RegEnable(request.bits.result, dut.io.input.fire)
+  val lastRequestResult: UInt     = RegEnable(request.bits.result, dut.io.input.fire)
   val checkRight:        Sequence = lastRequestResult === dut.io.output.bits
   val inputNotValid:     Sequence = dut.io.input.ready && !dut.io.input.valid
 
@@ -140,19 +140,19 @@ case class TestVerbatimParameter(
 @instantiable
 class TestVerbatimOM(parameter: TestVerbatimParameter) extends Class {
   val useAsyncReset:    Property[Boolean] = IO(Output(Property[Boolean]()))
-  val initFunctionName: Property[String] = IO(Output(Property[String]()))
-  val dumpFunctionName: Property[String] = IO(Output(Property[String]()))
-  val clockFlipTick:    Property[Int] = IO(Output(Property[Int]()))
-  val resetFlipTick:    Property[Int] = IO(Output(Property[Int]()))
-  val gcd = IO(Output(Property[AnyClassType]()))
+  val initFunctionName: Property[String]  = IO(Output(Property[String]()))
+  val dumpFunctionName: Property[String]  = IO(Output(Property[String]()))
+  val clockFlipTick:    Property[Int]     = IO(Output(Property[Int]()))
+  val resetFlipTick:    Property[Int]     = IO(Output(Property[Int]()))
+  val gcd   = IO(Output(Property[AnyClassType]()))
   @public
   val gcdIn = IO(Input(Property[AnyClassType]()))
-  gcd := gcdIn
-  useAsyncReset := Property(parameter.useAsyncReset)
+  gcd              := gcdIn
+  useAsyncReset    := Property(parameter.useAsyncReset)
   initFunctionName := Property(parameter.initFunctionName)
   dumpFunctionName := Property(parameter.dumpFunctionName)
-  clockFlipTick := Property(parameter.clockFlipTick)
-  resetFlipTick := Property(parameter.resetFlipTick)
+  clockFlipTick    := Property(parameter.clockFlipTick)
+  resetFlipTick    := Property(parameter.resetFlipTick)
 }
 
 /** Test blackbox for clockgen, wave dump and extra testbench-only codes. */
