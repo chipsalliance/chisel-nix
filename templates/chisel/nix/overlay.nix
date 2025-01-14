@@ -20,6 +20,8 @@ final: prev: {
 
   fetchMillDeps = final.callPackage ./pkgs/mill-builder.nix { };
 
+  publishMillModule = final.callPackage ./pkgs/dependencies { };
+
   circt-full = final.callPackage ./pkgs/circt-full.nix { };
 
   # faster strip-undetereminism

@@ -4,6 +4,7 @@
 { lib
 , stdenv
 , fetchMillDeps
+, publishMillModule
 , makeWrapper
 , jdk21
 , git
@@ -20,6 +21,15 @@
 }:
 
 let
+  chisel =
+    publishMillModule {
+      name = "chisel";
+      version = "9999";
+      outputHash = "sha256-ZJGYxmTg4+8UU3V3MTxBSWow4XYKQ4KuCvD/PBxLSEc=";
+      publishPhase = "mill -i unipublish.publishLocal";
+      nativeBuildInputs = [ git ];
+    };
+
   self = stdenv.mkDerivation rec {
     name = "gcd";
 
@@ -29,8 +39,8 @@ let
       toSource {
         root = ./../..;
         fileset = unions [
-          ./../../build.sc
-          ./../../common.sc
+          ./../../build.mill
+          ./../../common.mill
           ./../../gcd
           ./../../elaborator
         ];
@@ -42,9 +52,10 @@ let
         src = with lib.fileset;
           toSource {
             root = ./../..;
-            fileset = unions [ ./../../build.sc ./../../common.sc ];
+            fileset = unions [ ./../../build.mill ./../../common.mill ];
           };
-        millDepsHash = "sha256-5VTgJ1JaIxP3wk/WsFj+W1VGFE2xoPKu3XbmTVOvMdk=";
+        millDepModules = [ chisel ];
+        millDepsHash = "sha256-cPGkRjKc42dcSOXHAW9JAl/AKgwPdl+T8bVPsWCXxpM=";
         nativeBuildInputs = [ projectDependencies.setupHook ];
       };
 
