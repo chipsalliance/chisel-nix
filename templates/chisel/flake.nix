@@ -21,14 +21,15 @@
           inherit system;
         };
       in
+      with pkgs;
       {
-        formatter = pkgs.nixpkgs-fmt;
+        formatter = nixpkgs-fmt;
         legacyPackages = pkgs;
-        devShells.default = pkgs.mkShell ({
-          inputsFrom = [ pkgs.gcd.gcd-compiled pkgs.gcd.tb-dpi-lib ];
-          nativeBuildInputs = [ pkgs.cargo pkgs.rustfmt pkgs.rust-analyzer ];
+        devShells.default = mkShell ({
+          inputsFrom = [ gcd.gcd-compiled gcd.tb-dpi-lib ];
+          packages = [ cargo rustfmt rust-analyzer nixd nvfetcher ];
           RUST_SRC_PATH =
-            "${pkgs.rust.packages.stable.rustPlatform.rustLibSrc}";
-        } // pkgs.gcd.tb-dpi-lib.env // pkgs.gcd.gcd-compiled.env);
+            "${rust.packages.stable.rustPlatform.rustLibSrc}";
+        } // gcd.tb-dpi-lib.env // gcd.gcd-compiled.env);
       });
 }

@@ -1,9 +1,9 @@
 # SPDX-License-Identifier: Apache-2.0
 # SPDX-FileCopyrightText: 2024 Jiuyang Liu <liu@jiuyang.me>
 
-{ stdenvNoCC, mill, writeText, makeSetupHook, runCommand, lib }:
+{ stdenvNoCC, mill, rsync, writeText, makeSetupHook, lib }:
 
-{ name, src, millDepsHash, ... }@args:
+{ name, src, millDepModules, millDepsHash, ... }@args:
 
 let
   mill-rt-version = lib.head (lib.splitString "+" mill.jre.version);
@@ -13,17 +13,24 @@ let
 
     nativeBuildInputs = [
       mill
-    ] ++ (args.nativeBuildInputs or [ ]);
+      rsync
+    ]
+    ++ millDepModules
+    ++ (args.nativeBuildInputs or [ ]);
 
     impureEnvVars = [ "MILL_OPTS" ];
 
     buildPhase = ''
       runHook preBuild
-      echo "-D user.home=$TMPDIR $MILL_OPTS" > .mill-opts
-      export MILL_OPTS_PATH="$PWD/.mill-opts"
+      echo "-Duser.home=$TMPDIR $JAVA_OPTS" | tr ' ' '\n' > mill-java-opts
+      export MILL_JVM_OPTS_PATH=$PWD/mill-java-opts
+      
+      mkdir -p $TMPDIR/.ivy2
+       ${ lib.concatStringsSep "\n"
+       (map (module: "rsync -a --chmod=D775,F664 ${module}/.ivy2/local/ $TMPDIR/.ivy2/local/") millDepModules)}
 
       # Use "https://repo1.maven.org/maven2/" only to keep dependencies integrity
-      export COURSIER_REPOSITORIES="central"
+      export COURSIER_REPOSITORIES="ivy2Local|central"
 
       mill -i __.prepareOffline
       mill -i __.scalaCompilerClasspath
@@ -32,8 +39,9 @@ let
 
     installPhase = ''
       runHook preInstall
-      mkdir -p $out/.cache
+      mkdir -p $out/.cache $out/.ivy2
       mv $TMPDIR/.cache/coursier $out/.cache/coursier
+      mv $TMPDIR/.ivy2/local $out/.ivy2/local
       runHook postInstall
     '';
 
@@ -52,11 +60,14 @@ let
       (writeText "mill-setup-hook" ''
         setupMillCache() {
           local tmpdir=$(mktemp -d)
-          export JAVA_OPTS="$JAVA_OPTS -Duser.home=$tmpdir"
+          echo "$JAVA_OPTS -Duser.home=$tmpdir" | tr ' ' '\n' > mill-java-opts
+          export MILL_JVM_OPTS_PATH=$PWD/mill-java-opts
 
-          mkdir -p "$tmpdir"/.cache "$tmpdir/.mill/ammonite"
+          mkdir -p "$tmpdir"/.cache "$tmpdir"/.ivy2 "$tmpdir/.mill/ammonite"
 
           cp -r "${self}"/.cache/coursier "$tmpdir"/.cache/
+          cp -r "${self}"/.ivy2/local "$tmpdir"/.ivy2/
+          
           touch "$tmpdir/.mill/ammonite/rt-${mill-rt-version}.jar"
 
           echo "JAVA HOME dir set to $tmpdir"
