@@ -31,7 +31,5 @@ final: prev: {
 
   cds-fhs-env = final.callPackage ./pkgs/cds-fhs-env.nix { inherit getEnv'; };
 
-  projectDependencies = final.callPackage ./pkgs/project-dependencies.nix { };
-
   gcd = final.callPackage ./gcd { };
 }
