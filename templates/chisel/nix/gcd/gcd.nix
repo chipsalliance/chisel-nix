@@ -15,7 +15,6 @@
 , circt-full
 , jextract-21
 , add-determinism
-, projectDependencies
 
 , target
 }:
@@ -56,7 +55,6 @@ let
           };
         millDepModules = [ chisel ];
         millDepsHash = "sha256-cPGkRjKc42dcSOXHAW9JAl/AKgwPdl+T8bVPsWCXxpM=";
-        nativeBuildInputs = [ projectDependencies.setupHook ];
       };
 
       editable = self.overrideAttrs (_: {
@@ -84,8 +82,6 @@ let
 
       makeWrapper
       passthru.millDeps.setupHook
-
-      projectDependencies.setupHook
     ];
 
     env = {
