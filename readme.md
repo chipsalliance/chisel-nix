@@ -211,3 +211,159 @@ stdenv.mkDerivation {
 ## License
 
 The build system is released under the Apache-2.0 license, including all Nix and mill build system, All rights reserved by Jiuyang Liu <liu@Jiuyang.me>
+
+# Overlays
+
+chisel-nix also provides some overlays file that contains common use nix script to help reduce copy-pasting.
+
+## `mill-flows`
+
+The `mill-flows` overlay provide a set of tools to control dependencies in a Mill based project.
+Users can add "chisel-nix" to the Nix Flake input to use this overlay.
+
+* An example `mill-flows` import example
+
+```nix
+{
+  description = "Basic Flake";
+
+  inputs = {
+    nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
+    chisel-nix.url = "github:chipsalliance/chisel-nix";
+    flake-utils.url = "github:numtide/flake-utils";
+  };
+
+  outputs = { self, nixpkgs, chisel-nix, flake-utils }@inputs:
+    flake-utils.lib.eachDefaultSystem (system: {
+      legacyPackages = import nixpkgs {
+        overlays = [ chisel-nix.overlays.mill-flows ];
+        inherit system;
+      };
+    }) // { inherit inputs; };
+}
+```
+
+After importing the `mill-flows` overlay to nixpkgs, users wil have following build script:
+
+### `fetchMillDeps`
+
+The `fetchMillDeps` function will run `mill -i __.prepareOffline` to fetch all the ivy dependencies from internet,
+and provide a `setupHook` attribute to help reuse all the dependencies in other derivations.
+
+* Type
+
+```nix
+{ name :: String; src :: Path; millDepsHash :: String; ... } -> Derivation
+```
+
+> This function accept additional attibutes to override the attibute set to be passed to
+> `stdenv.mkDerivation` function.
+
+* Example
+
+```nix
+{ fetchFromGitHub, fetchMillDeps }:
+let
+  chiselSrc = fetchFromGitHub {
+    owner = "chipsalliance";
+    repo = "chisel";
+    rev = "8a1f1b66e5e87dff6c8356fae346eb46512756cf";
+    hash = "sha256-pB8kzqUmvHTG2FqRRjqig1FK9pGYrgBDOOekCqkwrsE=";
+  };
+in
+fetchMillDeps {
+  name = "chisel";
+  src = chiselSrc;
+  millDepsHash = "sha256-NBHUq5MaGiiaDA5mjeP0xcU5jNe9wWordL01a6khy7I=";
+};
+```
+
+In the above example, `fetchMillDeps` function will resolve all ivy dependencies in chisel project,
+return a path to the local coursier repository, and calculate file hash from the returning path.
+Users can use the `.setupHook` function in other derivation's `buildInputs` to have coursier repository
+automatically setup in build environment.
+
+```nix
+# ...
+stdenv.mkDerivation {
+    # ...
+
+    buildInputs = [
+      chisel.setupHook
+      # ...
+    ];
+
+    buildPhase = ''
+      # ...
+      # No need to download dependency again
+      mill -i obj.assembly
+    '';
+}
+```
+
+### `publishMillJar`
+
+The `publishMillJar` function will run `mill -i $target.publishLocal` to pack up the given module.
+
+* Type
+
+```nix
+{ name :: String; src :: Path; publishTargets :: [String]; ... } -> Derivation
+```
+
+> This function accept additional attibutes to override the attibute set to be passed to
+> `stdenv.mkDerivation` function.
+
+* Example
+
+```nix
+{ fetchMillDeps
+, publishMillJar
+, fetchFromGitHub
+, git
+}:
+let
+  chiselSrc = fetchFromGitHub {
+    owner = "chipsalliance";
+    repo = "chisel";
+    rev = "8a1f1b66e5e87dff6c8356fae346eb46512756cf";
+    hash = "sha256-pB8kzqUmvHTG2FqRRjqig1FK9pGYrgBDOOekCqkwrsE=";
+  };
+  chiselDeps = fetchMillDeps {
+    name = "chisel";
+    src = chiselSrc;
+    millDepsHash = "sha256-NBHUq5MaGiiaDA5mjeP0xcU5jNe9wWordL01a6khy7I=";
+  };
+in
+publishMillJar {
+  name = "chisel";
+  src = chiselSrc;
+
+  publishTargets = [
+    "unipublish"
+  ];
+
+  buildInputs = [
+    chiselDeps.setupHook
+  ];
+
+  nativeBuildInputs = [
+    # chisel requires git to generate version
+    git
+  ];
+
+  passthru = {
+    inherit chiselDeps;
+  };
+}
+```
+
+The above declaration will run `mill -i unipublish.publishLocal` command and store the ivy repository
+to output directory. And it also provide a `setupHook` attribute, so users can have the ivy repository
+automatically installed in other derivation build environment.
+
+> [!note]
+>
+> Worth notice that, if user pass other ivy repository to the `publishMillJar` builder,
+> the old and new ivy repository will be merged and output JAR will be stored together.
+> These will cause the output size increse and larger than expected for those top-level project.

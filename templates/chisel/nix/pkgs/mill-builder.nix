@@ -15,11 +15,12 @@ let
       mill
     ] ++ (args.nativeBuildInputs or [ ]);
 
-    impureEnvVars = [ "JAVA_OPTS" ];
+    impureEnvVars = [ "MILL_OPTS" ];
 
     buildPhase = ''
       runHook preBuild
-      export JAVA_OPTS="-Duser.home=$TMPDIR $JAVA_OPTS"
+      echo "-D user.home=$TMPDIR $MILL_OPTS" > .mill-opts
+      export MILL_OPTS_PATH="$PWD/.mill-opts"
 
       # Use "https://repo1.maven.org/maven2/" only to keep dependencies integrity
       export COURSIER_REPOSITORIES="central"
