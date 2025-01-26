@@ -15,62 +15,56 @@
 }@args:
 
 let
-  self = stdenvNoCC.mkDerivation (lib.recursiveUpdate
-    {
-      name = "${name}-mill-deps";
-      inherit src;
+  buildAttr = {
+    name = "${name}-mill-deps";
+    inherit src;
 
-      nativeBuildInputs = [
-        mill
-        configure-mill-home-hook
-      ] ++ (args.nativeBuildInputs or [ ]);
+    propagatedBuildInputs = [
+      mill
+      configure-mill-home-hook
+      lndir
+    ] ++ (args.propagatedBuildInputs or [ ]);
 
-      impureEnvVars = [ "JAVA_OPTS" ];
+    impureEnvVars = [ "JAVA_OPTS" ];
 
-      buildPhase = ''
-        runHook preBuild
+    buildPhase = ''
+      runHook preBuild
 
-        # Use "https://repo1.maven.org/maven2/" only to keep dependencies integrity
-        export COURSIER_REPOSITORIES="ivy2local|central"
+      # Use "https://repo1.maven.org/maven2/" only to keep dependencies integrity
+      export COURSIER_REPOSITORIES="ivy2local|central"
 
-        mill -i __.prepareOffline
-        mill -i __.scalaCompilerClasspath
+      mill -i __.prepareOffline
+      mill -i __.scalaCompilerClasspath
 
-        runHook postBuild
-      '';
+      runHook postBuild
+    '';
 
-      installPhase = ''
-        runHook preInstall
+    installPhase = ''
+      runHook preInstall
 
-        mkdir -p $out/.cache
-        mv "$NIX_MILL_HOME"/.cache/coursier $out/.cache/coursier
+      mkdir -p $out/.cache
+      mv "$NIX_MILL_HOME"/.cache/coursier $out/.cache/coursier
 
-        runHook postInstall
-      '';
+      mkdir -p $out/nix-support
+      cp ${./setup-mill-deps.sh} $out/nix-support/setup-hook
+      recordPropagatedDependencies
 
-      outputHashAlgo = "sha256";
-      outputHashMode = "recursive";
-      outputHash = millDepsHash;
+      runHook postInstall
+    '';
 
-      dontShrink = true;
-      dontPatchELF = true;
+    postFixup = ''
+      cat "$out"/nix-support/setup-hook
+      cat "$out"/nix-support/propagated-build-inputs
+    '';
 
-      passthru.setupHook = makeSetupHook
-        {
-          name = "mill-setup-hook.sh";
-          propagatedBuildInputs = [ mill configure-mill-home-hook ];
-        }
-        (writeText "mill-setup-hook" ''
-          setupMillCache() {
-            mkdir -p "$NIX_MILL_HOME/.cache/coursier"
-            ${lndir}/bin/lndir "${self}"/.cache/coursier "$NIX_MILL_HOME"/.cache/coursier
+    outputHashAlgo = "sha256";
+    outputHashMode = "recursive";
+    outputHash = millDepsHash;
 
-            echo "Copied mill deps into $NIX_MILL_HOME"
-          }
-
-          postUnpackHooks+=(setupMillCache)
-        '');
-    }
-    (builtins.removeAttrs args [ "name" "src" "millDepsHash" "nativeBuildInputs" ]));
+    dontShrink = true;
+    dontPatchELF = true;
+  };
 in
-self
+stdenvNoCC.mkDerivation
+  (lib.recursiveUpdate buildAttr
+    (builtins.removeAttrs args [ "name" "src" "millDepsHash" "propagatedBuildInputs" ]))

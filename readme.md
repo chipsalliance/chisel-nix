@@ -344,7 +344,7 @@ publishMillJar {
   ];
 
   buildInputs = [
-    chiselDeps.setupHook
+    chiselDeps
   ];
 
   nativeBuildInputs = [
