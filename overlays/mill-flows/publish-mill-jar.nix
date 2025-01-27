@@ -26,7 +26,7 @@ let
       buildPhase = ''
         runHook preBuild
 
-        publishTargetsArray=( "$publishTargets" )
+        publishTargetsArray=( $publishTargets )
         for target in "''${publishTargetsArray[@]}"; do
           mill -i "$target.publishLocal"
         done
