@@ -21,18 +21,12 @@ let
         configure-mill-home-hook
       ] ++ (args.nativeBuildInputs or [ ]);
 
-      publishTargets = lib.escapeShellArgs publishTargets;
-
-      buildPhase = ''
-        runHook preBuild
-
-        publishTargetsArray=( $publishTargets )
-        for target in "''${publishTargetsArray[@]}"; do
-          mill -i "$target.publishLocal"
-        done
-
-        runHook postBuild
-      '';
+      # It is hard to handle shell escape for bracket, let's just codegen build script
+      buildPhase = lib.concatStringsSep "\n" (
+        [ "runHook preBuild" ]
+        ++ (map (target: "mill -i '${target}'.publishLocal") publishTargets)
+        ++ [ "runHook postBuild" ]
+      );
 
       installPhase = ''
         runHook preInstall
@@ -62,6 +56,6 @@ let
           postUnpackHooks+=(setupIvyLocalRepo)
         '');
     }
-    (builtins.removeAttrs args [ "name" "src" "nativeBuildInputs" ]));
+    (builtins.removeAttrs args [ "name" "src" "publishTargets" "nativeBuildInputs" ]));
 in
 self
