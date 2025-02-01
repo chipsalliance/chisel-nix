@@ -1,6 +1,7 @@
 { pkgs
 , stdenv
 , mill
+, add-determinism
 , ...
 }:
 { name
@@ -42,6 +43,10 @@ stdenv.mkDerivation {
     runHook preInstall
     mkdir -p $out/.ivy2
     mv $TMPDIR/ivy/local $out/.ivy2/local
+
+    export SOURCE_DATE_EPOCH=1669810380
+    find $out -type f -name '*.jar' -exec '${add-determinism}/bin/add-determinism' -j "$NIX_BUILD_CORES" '{}' ';'
+
     runHook postInstall
   '';
 }

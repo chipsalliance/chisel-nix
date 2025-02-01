@@ -24,7 +24,7 @@ let
     publishMillModule {
       name = "chisel";
       version = "9999";
-      outputHash = "sha256-fuorZlUbH+oDt6XGHBqMmOXaRHzZVntRgIln1NeYLeQ=";
+      outputHash = "sha256-wXDmafSEoJxg1mv6uleKtRDCuFuTdEt+FmiH6NO7anc=";
       publishPhase = "mill -i unipublish.publishLocal";
       nativeBuildInputs = [ git ];
     };
@@ -54,7 +54,7 @@ let
             fileset = unions [ ./../../build.mill ./../../common.mill ];
           };
         millDepModules = [ chisel ];
-        millDepsHash = "sha256-Vav1Svh06MUNO1KI0XcioxWbhGZnADXa0vOrbWDZI+U=";
+        millDepsHash = "sha256-saHZcLBulNESco16mqwgiPndFA/V+4uexnqgLCinuWs=";
       };
 
       editable = self.overrideAttrs (_: {
