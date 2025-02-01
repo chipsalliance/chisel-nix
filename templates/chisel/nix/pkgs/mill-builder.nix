@@ -7,6 +7,7 @@
 
 let
   mill-rt-version = lib.head (lib.splitString "+" mill.jre.version);
+  cachePrefix = if stdenvNoCC.hostPlatform.isDarwin then "Library/Caches/Coursier" else ".cache/coursier";
   self = stdenvNoCC.mkDerivation ({
     name = "${name}-mill-deps";
     inherit src;
@@ -40,7 +41,8 @@ let
     installPhase = ''
       runHook preInstall
       mkdir -p $out/.cache $out/.ivy2
-      mv $TMPDIR/.cache/coursier $out/.cache/coursier
+
+      mv $TMPDIR/${cachePrefix} $out/.cache/coursier
       mv $TMPDIR/.ivy2/local $out/.ivy2/local
       runHook postInstall
     '';

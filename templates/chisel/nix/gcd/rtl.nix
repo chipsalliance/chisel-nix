@@ -15,7 +15,7 @@
 , enable-layers ? [ ]
 }:
 let
-  processLayer = lib.map (str: "./" + lib.replaceStrings [ "." ] [ "/" ] str);
+  processLayer = lib.map (str: "./" + lib.replaceStrings [ "." ] [ "/" ] (lib.toLower str));
   enableLayersDirs = processLayer enable-layers;
 in
 stdenvNoCC.mkDerivation {
