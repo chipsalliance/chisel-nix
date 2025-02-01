@@ -4,6 +4,7 @@
 { lib
 , rustPlatform
 , fetchFromGitHub
+, fetchpatch
 , pkg-config
 , zlib
 , python3
@@ -33,7 +34,10 @@ rustPlatform.buildRustPackage {
   };
 
   patches = [
-    ./fix-darwin.patch
+    (fetchpatch {
+      url = "https://github.com/Emin017/add-determinism/commit/0c6c4d1c78c845ab6b6b0666aee0e2dc85492205.patch";
+      sha256 = "sha256-y5blOfQuZ5GMug4cDkDDKc5jaGgQEYtLTuuLl041sZs=";
+    })
   ];
 
   postPatch = ''
