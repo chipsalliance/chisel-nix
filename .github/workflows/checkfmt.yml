@@ -32,6 +32,8 @@ jobs:
       - name: "Check Scala format"
         if: "!cancelled()"
         run: |
+          echo "$JAVA_OPTS" | tr ' ' '\n' > mill-java-opts
+          export MILL_JVM_OPTS_PATH=$PWD/mill-java-opts
           nix develop -c bash -c 'mill -i gcd.checkFormat && mill -i elaborator.checkFormat'
       - name: "Check Rust format"
         if: "!cancelled()"
