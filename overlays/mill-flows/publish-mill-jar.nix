@@ -46,14 +46,14 @@ let
           propagatedBuildInputs = [ mill configure-mill-home-hook ];
         }
         (writeText "mill-setup-hook" ''
-          setupIvyLocalRepo() {
+          setup${name}IvyLocalRepo() {
             mkdir -p "$NIX_MILL_HOME/.ivy2/local"
             ${lndir}/bin/lndir "${self}/.ivy2/local" "$NIX_MILL_HOME/.ivy2/local"
 
             echo "Copy ivy repo to $NIX_MILL_HOME"
           }
 
-          postUnpackHooks+=(setupIvyLocalRepo)
+          postUnpackHooks+=(setup${name}IvyLocalRepo)
         '');
     }
     (builtins.removeAttrs args [ "name" "src" "publishTargets" "nativeBuildInputs" ]));
