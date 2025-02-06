@@ -11,6 +11,7 @@
 { name
 , src
 , millDepsHash
+, fetchTargets ? [ "__" ] # "__" means resolve all targets ivy deps
 , ...
 }@args:
 
@@ -32,8 +33,9 @@ let
 
         # Use "https://repo1.maven.org/maven2/" only to keep dependencies integrity
         export COURSIER_REPOSITORIES="ivy2local|central"
-
-        mill -i __.prepareOffline
+      ''
+      + (lib.concatMapStrings (x: "mill -i '${x}'.prepareOffline\n") fetchTargets)
+      + ''
         mill -i __.scalaCompilerClasspath
 
         runHook postBuild
