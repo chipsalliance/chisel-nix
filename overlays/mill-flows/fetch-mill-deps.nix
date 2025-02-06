@@ -63,14 +63,14 @@ let
           propagatedBuildInputs = [ mill configure-mill-home-hook ];
         }
         (writeText "mill-setup-hook" ''
-          setupMillCache() {
+          setup${name}MillCache() {
             mkdir -p "$NIX_MILL_HOME/.cache/coursier"
             ${lndir}/bin/lndir "${self}"/.cache/coursier "$NIX_MILL_HOME"/.cache/coursier
 
             echo "Copied mill deps into $NIX_MILL_HOME"
           }
 
-          postUnpackHooks+=(setupMillCache)
+          postUnpackHooks+=(setup${name}MillCache)
         '');
     }
     (builtins.removeAttrs args [ "name" "src" "millDepsHash" "nativeBuildInputs" ]));
