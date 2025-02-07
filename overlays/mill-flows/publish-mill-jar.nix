@@ -6,6 +6,7 @@
 , lib
 , lndir
 , configure-mill-home-hook
+, add-determinism
 }:
 
 { name, src, publishTargets, ... }@args:
@@ -35,6 +36,21 @@ let
         mv $NIX_MILL_HOME/.ivy2/local $out/.ivy2/
 
         runHook postInstall
+      '';
+
+      fixupPhase = ''
+        runHook preFixup
+
+        # Fix reproducibility
+
+        # https://github.com/chipsalliance/chisel/issues/4666
+        find $out/.ivy2/local -wholename '*/docs/*.jar' -type f -delete
+
+        # Align datetime
+        export SOURCE_DATE_EPOCH=1669810380
+        find $out/.ivy2/local -type f -name '*.jar' -exec '${add-determinism}/bin/add-determinism' -j "$NIX_BUILD_CORES" '{}' ';'
+
+        runHook postFixup
       '';
 
       dontShrink = true;
