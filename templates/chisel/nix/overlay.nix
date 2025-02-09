@@ -18,18 +18,13 @@ final: prev: {
     in (prev.mill.override { inherit jre; }).overrideAttrs
       (_: { passthru = { inherit jre; }; });
 
-  fetchMillDeps = final.callPackage ./pkgs/mill-builder.nix { };
+  mill-dependencies = final.callPackage ./pkgs/dependencies { };
 
   circt-full = final.callPackage ./pkgs/circt-full.nix { };
-
-  # faster strip-undetereminism
-  add-determinism = final.callPackage ./pkgs/add-determinism { };
 
   vcs-fhs-env = final.callPackage ./pkgs/vcs-fhs-env.nix { inherit getEnv'; };
 
   cds-fhs-env = final.callPackage ./pkgs/cds-fhs-env.nix { inherit getEnv'; };
-
-  projectDependencies = final.callPackage ./pkgs/project-dependencies.nix { };
 
   gcd = final.callPackage ./gcd { };
 }
