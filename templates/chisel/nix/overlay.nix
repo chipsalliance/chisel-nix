@@ -18,9 +18,7 @@ final: prev: {
     in (prev.mill.override { inherit jre; }).overrideAttrs
       (_: { passthru = { inherit jre; }; });
 
-  fetchMillDeps = final.callPackage ./pkgs/mill-builder.nix { };
-
-  publishMillModule = final.callPackage ./pkgs/dependencies { };
+  mill-dependencies = final.callPackage ./pkgs/dependencies { };
 
   circt-full = final.callPackage ./pkgs/circt-full.nix { };
 

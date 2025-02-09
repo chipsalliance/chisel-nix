@@ -6,9 +6,10 @@
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
     flake-utils.url = "github:numtide/flake-utils";
+    chisel-nix.url = "github:chipsalliance/chisel-nix";
   };
 
-  outputs = inputs@{ self, nixpkgs, flake-utils }:
+  outputs = inputs@{ self, nixpkgs, flake-utils, chisel-nix }:
     let overlay = import ./nix/overlay.nix;
     in {
       # System-independent attr
@@ -17,7 +18,7 @@
     } // flake-utils.lib.eachDefaultSystem (system:
       let
         pkgs = import nixpkgs {
-          overlays = [ overlay ];
+          overlays = [ overlay chisel-nix.overlays.mill-flows ];
           inherit system;
         };
       in

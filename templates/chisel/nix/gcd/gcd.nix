@@ -4,12 +4,12 @@
 { lib
 , stdenv
 , fetchMillDeps
-, publishMillModule
 , makeWrapper
 , jdk21
 , git
 
   # chisel deps
+, mill-dependencies
 , mill
 , espresso
 , circt-full
@@ -20,19 +20,6 @@
 }:
 
 let
-  chisel =
-    publishMillModule {
-      name = "chisel";
-      version = "9999";
-      outputHash =
-        if stdenv.hostPlatform.isDarwin then
-          "sha256-wXDmafSEoJxg1mv6uleKtRDCuFuTdEt+FmiH6NO7anc="
-        else
-          "sha256-vmuJyLQrgAe2ffMNxzKKUygk4WGoxHjq0cR1o+wZ0u8=";
-      publishPhase = "mill -i unipublish.publishLocal";
-      nativeBuildInputs = [ git ];
-    };
-
   self = stdenv.mkDerivation rec {
     name = "gcd";
 
@@ -57,30 +44,17 @@ let
             root = ./../..;
             fileset = unions [ ./../../build.mill ./../../common.mill ];
           };
-        millDepModules = [ chisel ];
-        millDepsHash =
-          if stdenv.hostPlatform.isDarwin then
-            "sha256-saHZcLBulNESco16mqwgiPndFA/V+4uexnqgLCinuWs="
-          else
-            "sha256-MA8Yx99ItVRhNPB/LigwCaTMywrJF3JEYv3fSeWdeNk=";
+        buildInputs = with mill-dependencies; [ chisel.setupHook ];
+        millDepsHash = "sha256-NybS2AXRQtXkgHd5nH4Ltq3sxZr5aZ4VepiT79o1AWo=";
       };
-
-      editable = self.overrideAttrs (_: {
-        shellHook = ''
-          setupSubmodulesEditable
-          mill mill.bsp.BSP/install 0
-        '';
-      });
 
       inherit target;
       inherit env;
     };
 
-    shellHook = ''
-      setupSubmodules
-    '';
+    nativeBuildInputs = with mill-dependencies; [
+      makeWrapper
 
-    nativeBuildInputs = [
       mill
       circt-full
       jextract-21
@@ -88,8 +62,8 @@ let
       espresso
       git
 
-      makeWrapper
       passthru.millDeps.setupHook
+      chisel.setupHook
     ];
 
     env = {
