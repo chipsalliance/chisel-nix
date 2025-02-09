@@ -9,12 +9,12 @@
 , git
 
   # chisel deps
+, mill-dependencies
 , mill
 , espresso
 , circt-full
 , jextract-21
 , add-determinism
-, projectDependencies
 
 , target
 }:
@@ -29,8 +29,8 @@ let
       toSource {
         root = ./../..;
         fileset = unions [
-          ./../../build.sc
-          ./../../common.sc
+          ./../../build.mill
+          ./../../common.mill
           ./../../gcd
           ./../../elaborator
         ];
@@ -42,28 +42,19 @@ let
         src = with lib.fileset;
           toSource {
             root = ./../..;
-            fileset = unions [ ./../../build.sc ./../../common.sc ];
+            fileset = unions [ ./../../build.mill ./../../common.mill ];
           };
-        millDepsHash = "sha256-5VTgJ1JaIxP3wk/WsFj+W1VGFE2xoPKu3XbmTVOvMdk=";
-        nativeBuildInputs = [ projectDependencies.setupHook ];
+        buildInputs = with mill-dependencies; [ chisel.setupHook ];
+        millDepsHash = "sha256-NybS2AXRQtXkgHd5nH4Ltq3sxZr5aZ4VepiT79o1AWo=";
       };
-
-      editable = self.overrideAttrs (_: {
-        shellHook = ''
-          setupSubmodulesEditable
-          mill mill.bsp.BSP/install 0
-        '';
-      });
 
       inherit target;
       inherit env;
     };
 
-    shellHook = ''
-      setupSubmodules
-    '';
+    nativeBuildInputs = with mill-dependencies; [
+      makeWrapper
 
-    nativeBuildInputs = [
       mill
       circt-full
       jextract-21
@@ -71,10 +62,8 @@ let
       espresso
       git
 
-      makeWrapper
       passthru.millDeps.setupHook
-
-      projectDependencies.setupHook
+      chisel.setupHook
     ];
 
     env = {
