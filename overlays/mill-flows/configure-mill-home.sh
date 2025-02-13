@@ -6,6 +6,8 @@ configureMillHome() {
   # Set home directory to a custom directory, so that we can easily filter clean sources
   if [[ ! "$JAVA_OPTS" =~ "-Duser.home" ]]; then
     export JAVA_OPTS="$JAVA_OPTS -Duser.home=$NIX_MILL_HOME"
+    # Oracle Java use this env
+    export JAVA_TOOL_OPTIONS="$JAVA_TOOL_OPTIONS -Duser.home=$NIX_MILL_HOME"
   fi
 
   # In case mill doesn't pass "$JAVA_OPTS" to fork process
