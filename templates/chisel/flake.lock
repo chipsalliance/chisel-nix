@@ -2,11 +2,11 @@
   "nodes": {
     "chisel-nix": {
       "locked": {
-        "lastModified": 1739865512,
-        "narHash": "sha256-Ubb5tRa2w2ngfbQj05iPzTLZd/QBIxrpDrFEgUAOtPA=",
+        "lastModified": 1740015880,
+        "narHash": "sha256-PuAnT+eu1wc7Ix5DoXnFaij3q/6z9AEY82nsIrALoEo=",
         "owner": "chipsalliance",
         "repo": "chisel-nix",
-        "rev": "5810033632f3caec4a34593a1900cf71be7d8d47",
+        "rev": "32035af1f043673657a67aa79609a800cdda0410",
         "type": "github"
       },
       "original": {
@@ -35,11 +35,11 @@
     },
     "nixpkgs": {
       "locked": {
-        "lastModified": 1739736696,
-        "narHash": "sha256-zON2GNBkzsIyALlOCFiEBcIjI4w38GYOb+P+R4S8Jsw=",
+        "lastModified": 1739866667,
+        "narHash": "sha256-EO1ygNKZlsAC9avfcwHkKGMsmipUk1Uc0TbrEZpkn64=",
         "owner": "NixOS",
         "repo": "nixpkgs",
-        "rev": "d74a2335ac9c133d6bbec9fc98d91a77f1604c1f",
+        "rev": "73cf49b8ad837ade2de76f87eb53fc85ed5d4680",
         "type": "github"
       },
       "original": {
