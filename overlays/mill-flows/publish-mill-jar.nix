@@ -5,7 +5,7 @@
 , runCommand
 , lib
 , lndir
-, configure-mill-home-hook
+, configure-mill-env-hook
 , add-determinism
 }:
 
@@ -19,7 +19,7 @@ let
 
       nativeBuildInputs = [
         mill
-        configure-mill-home-hook
+        configure-mill-env-hook
       ] ++ (args.nativeBuildInputs or [ ]);
 
       # It is hard to handle shell escape for bracket, let's just codegen build script
@@ -33,7 +33,7 @@ let
         runHook preInstall
 
         mkdir -p $out/.ivy2
-        mv $NIX_MILL_HOME/.ivy2/local $out/.ivy2/
+        mv $NIX_MILL_HOME/.ivy2/local $out/
 
         runHook postInstall
       '';
@@ -44,11 +44,11 @@ let
         # Fix reproducibility
 
         # https://github.com/chipsalliance/chisel/issues/4666
-        find $out/.ivy2/local -wholename '*/docs/*.jar' -type f -delete
+        find $out/local -wholename '*/docs/*.jar' -type f -delete
 
         # Align datetime
         export SOURCE_DATE_EPOCH=1669810380
-        find $out/.ivy2/local -type f -name '*.jar' -exec '${add-determinism}/bin/add-determinism' -j "$NIX_BUILD_CORES" '{}' ';'
+        find $out/local -type f -name '*.jar' -exec '${add-determinism}/bin/add-determinism' -j "$NIX_BUILD_CORES" '{}' ';'
 
         runHook postFixup
       '';
@@ -59,14 +59,14 @@ let
       passthru.setupHook = makeSetupHook
         {
           name = "mill-local-ivy-setup-hook.sh";
-          propagatedBuildInputs = [ mill configure-mill-home-hook ];
+          propagatedBuildInputs = [ mill configure-mill-env-hook ];
         }
         (writeText "mill-setup-hook" ''
           setup${name}IvyLocalRepo() {
-            mkdir -p "$NIX_MILL_HOME/.ivy2/local"
-            ${lndir}/bin/lndir "${self}/.ivy2/local" "$NIX_MILL_HOME/.ivy2/local"
+            mkdir -p "$NIX_COURSIER_DIR/local"
+            ${lndir}/bin/lndir "${self}/local" "$NIX_COURSIER_DIR/local"
 
-            echo "Copy ivy repo to $NIX_MILL_HOME"
+            echo "Copy ivy repo to $NIX_COURSIER_DIR"
           }
 
           postUnpackHooks+=(setup${name}IvyLocalRepo)
