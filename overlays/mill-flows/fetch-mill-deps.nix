@@ -4,7 +4,7 @@
 , makeSetupHook
 , runCommand
 , lib
-, configure-mill-home-hook
+, configure-mill-env-hook
 , lndir
 }:
 
@@ -23,7 +23,7 @@ let
 
       nativeBuildInputs = [
         mill
-        configure-mill-home-hook
+        configure-mill-env-hook
       ] ++ (args.nativeBuildInputs or [ ]);
 
       impureEnvVars = [ "JAVA_OPTS" ];
@@ -60,7 +60,7 @@ let
       passthru.setupHook = makeSetupHook
         {
           name = "mill-setup-hook.sh";
-          propagatedBuildInputs = [ mill configure-mill-home-hook ];
+          propagatedBuildInputs = [ mill configure-mill-env-hook ];
         }
         (writeText "mill-setup-hook" ''
           setup${name}MillCache() {

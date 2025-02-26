@@ -5,7 +5,7 @@
 , runCommand
 , lib
 , lndir
-, configure-mill-home-hook
+, configure-mill-env-hook
 , add-determinism
 }:
 
@@ -19,7 +19,7 @@ let
 
       nativeBuildInputs = [
         mill
-        configure-mill-home-hook
+        configure-mill-env-hook
       ] ++ (args.nativeBuildInputs or [ ]);
 
       # It is hard to handle shell escape for bracket, let's just codegen build script
@@ -59,7 +59,7 @@ let
       passthru.setupHook = makeSetupHook
         {
           name = "mill-local-ivy-setup-hook.sh";
-          propagatedBuildInputs = [ mill configure-mill-home-hook ];
+          propagatedBuildInputs = [ mill configure-mill-env-hook ];
         }
         (writeText "mill-setup-hook" ''
           setup${name}IvyLocalRepo() {
