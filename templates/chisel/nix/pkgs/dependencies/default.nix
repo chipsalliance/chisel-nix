@@ -19,7 +19,7 @@ lib.makeScope newScope (scope: {
         nativeBuildInputs = [
           git
         ];
-        millDepsHash = "sha256-alJbV8DhbocsFdC+qlUJeNrkq2/y5Vml7fIkCabEmT8=";
+        millDepsHash = "sha256-TmjZTFDXkWkQJTj4U9zZW6VxcJWNyHBuKL8op/2u/LI=";
       };
     in
     publishMillJar {
