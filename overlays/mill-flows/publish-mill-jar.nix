@@ -33,7 +33,7 @@ let
         runHook preInstall
 
         mkdir -p $out
-        mv $NIX_MILL_HOME/.ivy2/local $out/
+        mv $NIX_COURSIER_DIR/local $out/
 
         runHook postInstall
       '';
