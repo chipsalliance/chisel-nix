@@ -17,12 +17,10 @@ configureMillHome() {
   export COURSIER_CACHE="$NIX_COURSIER_DIR/cache"
 
   # Replace the ~/.ivy2 directory
-  export JAVA_OPTS="$JAVA_OPTS -Dcoursier.ivy.home=$NIX_COURSIER_DIR"
-  # Duplicate the cache dir settings to java system property, to avoid any env issues
-  export JAVA_OPTS="$JAVA_OPTS -Dcoursier.cache=$COURSIER_CACHE"
+  export JAVA_OPTS="-Dcoursier.ivy.home=$NIX_COURSIER_DIR $JAVA_OPTS"
 
   # Oracle Java use this env
-  export JAVA_TOOL_OPTIONS="$JAVA_TOOL_OPTIONS $JAVA_OPTS"
+  export JAVA_TOOL_OPTIONS="$JAVA_OPTS $JAVA_TOOL_OPTIONS"
 
   # In case mill doesn't pass "$JAVA_OPTS" to fork process
   echo "$JAVA_OPTS" | tr ' ' '\n' > "$NIX_BUILD_TOP/mill-java-opts"
