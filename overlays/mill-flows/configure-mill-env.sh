@@ -17,7 +17,11 @@ configureMillHome() {
   export COURSIER_CACHE="$NIX_COURSIER_DIR/cache"
 
   # Replace the ~/.ivy2 directory
+  ## This is the official coursier supported local repo modification way
   export JAVA_OPTS="-Dcoursier.ivy.home=$NIX_COURSIER_DIR $JAVA_OPTS"
+  ## This is mill vendored modification way
+  export JAVA_OPTS="-Divy.home=$NIX_COURSIER_DIR $JAVA_OPTS"
+  ## Support both could help us reduce debug time
 
   # Oracle Java use this env
   export JAVA_TOOL_OPTIONS="$JAVA_OPTS $JAVA_TOOL_OPTIONS"
