@@ -11,7 +11,7 @@
       let
         overlays = [
           (import ./overlays/mill-flows.nix)
-          (import mill-ivy-fetcher.overlays.default)
+          mill-ivy-fetcher.overlays.default
         ];
       in
       prev.lib.foldl

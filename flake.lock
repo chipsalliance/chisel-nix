@@ -41,11 +41,11 @@
         "nixpkgs": "nixpkgs"
       },
       "locked": {
-        "lastModified": 1741021732,
-        "narHash": "sha256-/z2BbxfLi9EfjUCw1tJeLoGzAIaiuBDZ33dXtZIChwI=",
+        "lastModified": 1741175654,
+        "narHash": "sha256-1I14XOZhX0Te3/Sv60QwwLExL6PW7QFw3Nzidl9EqyY=",
         "owner": "Avimitin",
         "repo": "mill-ivy-fetcher",
-        "rev": "5dec9c9dc14c70987fd437a2aa554d1ddd7a4ce7",
+        "rev": "bff5833d5c4ad264ce4f2cf14df400c9c8f7c51a",
         "type": "github"
       },
       "original": {
