@@ -3,7 +3,7 @@
 
 { lib
 , stdenv
-, fetchMillDeps
+, generateIvyCache
 , makeWrapper
 , jdk21
 , git
@@ -37,15 +37,10 @@ let
       };
 
     passthru = {
-      millDeps = fetchMillDeps {
-        inherit name;
-        src = with lib.fileset;
-          toSource {
-            root = ./../..;
-            fileset = unions [ ./../../build.mill ./../../common.mill ];
-          };
-        buildInputs = with mill-dependencies; [ chisel.setupHook ];
-        millDepsHash = "sha256-NybS2AXRQtXkgHd5nH4Ltq3sxZr5aZ4VepiT79o1AWo=";
+      millDeps = generateIvyCache {
+        inherit name src;
+        extraBuildInputs = with mill-dependencies; [ chisel.setupHook ];
+        hash = "sha256-GqN7l53MQHyhxbJ93XgnpdX0L2Bf5iDp8pDAnTyrz9s=";
       };
 
       inherit target;
@@ -62,9 +57,8 @@ let
       espresso
       git
 
-      passthru.millDeps.setupHook
       chisel.setupHook
-    ];
+    ] ++ passthru.millDeps.cache.ivyDepsList;
 
     env = {
       CIRCT_INSTALL_PATH = circt-full;
