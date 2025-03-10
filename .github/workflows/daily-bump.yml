@@ -29,7 +29,7 @@ jobs:
           nix run '.#nvfetcher' -- -f '^chisel$'
       - name: Bump all mill deps
         run: |
-          oldHash=$(nix derivation show .#gcd.gcd-compiled.millDeps | jq -r 'to_entries[0].value.env.outputHash')
+          oldHash=$(nix eval --no-warn-dirty --raw ".#gcd.gcd-compiled.millDeps.codegenFiles.outputHash")
           nix build '.#gcd.gcd-compiled.millDeps' --rebuild > milldeps-log.txt 2>&1 || true
           newHash=$(cat milldeps-log.txt \
             | grep -P '^\s+got:\s+sha256-.*$' \

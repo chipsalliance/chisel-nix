@@ -1,0 +1,40 @@
+#!/usr/bin/env bash
+
+set -e
+
+pushd templates/chisel
+
+if [[ ! -f "build.mill"  ]]; then
+  echo "Not running in project root" >&2
+  exit 1
+fi
+
+submoduleNames=(
+  "mill-dependencies.chisel.chiselDeps::nix/pkgs/dependencies/default.nix"
+  "gcd.gcd-compiled.millDeps::nix/gcd/gcd.nix"
+)
+for module in "${submoduleNames[@]}"; do
+  IFS='::' read -r -a moduleMeta <<< "$module"
+  name="${moduleMeta[0]}"
+  path="${moduleMeta[1]}"
+
+  echo "Rebuilding $name"
+  oldHash=$(nix eval --no-warn-dirty --raw ".#$name.codegenFiles.outputHash")
+  nix build --rebuild \
+    --no-warn-dirty --no-link \
+    ".#$name.codegenFiles" &> rebuild.log || true
+  newHash=$(cat rebuild.log \
+    | grep -P '^\s+got:\s+sha256-.*$' \
+    | cut -d':' -f2 \
+    | xargs)
+  if [[ -n "$newHash" && "$newHash" != "$oldHash" ]]; then
+    echo "Hash change for $name"
+    sed -i "s|$oldHash|$newHash|" "$path"
+  fi
+  rm -f rebuild.log
+
+  nix build --no-warn-dirty --out-link result ".#$name.codegenFiles"
+  cp -vf result/*-ivys.nix nix/locks/
+
+  rm -f result
+done
