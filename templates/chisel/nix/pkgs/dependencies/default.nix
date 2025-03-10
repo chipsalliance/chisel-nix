@@ -1,7 +1,7 @@
 { pkgs
 , lib
 , newScope
-, fetchMillDeps
+, generateIvyCache
 , publishMillJar
 , git
 , ...
@@ -12,21 +12,21 @@ in
 lib.makeScope newScope (scope: {
   chisel =
     let
-      chiselDeps = fetchMillDeps {
+      chiselDeps = generateIvyCache {
         name = "chisel";
         src = dependencies.chisel.src;
-        fetchTargets = [ "unipublish" ];
-        nativeBuildInputs = [
+        targets = [ "unipublish" ];
+        extraBuildInputs = [
           git
         ];
-        millDepsHash = "sha256-TmjZTFDXkWkQJTj4U9zZW6VxcJWNyHBuKL8op/2u/LI=";
+        hash = "sha256-2hagdxe1JBoNAdkY2QhzU/IVHkxBQ+16ENpPALJ7Gg0=";
       };
     in
     publishMillJar {
-      name = "chisel";
+      name = "chisel-snapshot";
       src = dependencies.chisel.src;
       publishTargets = [ "unipublish" ];
-      buildInputs = [ chiselDeps.setupHook ];
+      buildInputs = chiselDeps.cache.ivyDepsList;
       nativeBuildInputs = [
         git
       ];
