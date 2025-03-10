@@ -31,16 +31,28 @@ jobs:
           ref: ${{ github.event.pull_request.head.sha }}
       - name: "Build vcs simulator"
         run: |
-          nix build '.#gcd.vcs' --impure
+          nix build \
+            --override-input chisel-nix "github:chipsalliance/chisel-nix/${{ github.head_ref || github.ref_name }}" \
+            --impure \
+            '.#gcd.vcs'
       - name: "Build vcs simulator with trace"
         run: |
-          nix build '.#gcd.vcs-trace' --impure
+          nix build \
+            --override-input chisel-nix "github:chipsalliance/chisel-nix/${{ github.head_ref || github.ref_name }}" \
+            --impure \
+            '.#gcd.vcs-trace'
       - name: "Build verilator simulator"
         run: |
-          nix build '.#gcd.verilated'
+          nix build \
+            --override-input chisel-nix "github:chipsalliance/chisel-nix/${{ github.head_ref || github.ref_name }}" \
+            --impure \
+            '.#gcd.verilated'
       - name: "Build verilator simulator with trace"
         run: |
-          nix build '.#gcd.verilated-trace'
+          nix build \
+            --override-input chisel-nix "github:chipsalliance/chisel-nix/${{ github.head_ref || github.ref_name }}" \
+            --impure \
+            '.#gcd.verilated-trace'
 
   run-vcs:
     name: "Run VCS"
@@ -56,7 +68,11 @@ jobs:
           ref: ${{ github.event.pull_request.head.sha }}
       - name: "Run VCS"
         run: |
-          nix build '.#gcd.vcs.tests.simple-sim' --impure -L && cat result/urgReport/asserts.txt
+          nix build \
+            --override-input chisel-nix "github:chipsalliance/chisel-nix/${{ github.head_ref || github.ref_name }}" \
+            --impure \
+            -L \
+            '.#gcd.vcs.tests.simple-sim' && cat result/urgReport/asserts.txt
 
   run-verilator:
     name: "Run Verilator"
@@ -72,7 +88,9 @@ jobs:
           ref: ${{ github.event.pull_request.head.sha }}
       - name: "Run verilator"
         run: |
-          nix run '.#gcd.verilated'
+          nix run \
+            --override-input chisel-nix "github:chipsalliance/chisel-nix/${{ github.head_ref || github.ref_name }}" \
+            '.#gcd.verilated'
 
   run-jg-fpv:
     name: "Run JasperGold FPV"
@@ -88,4 +106,8 @@ jobs:
           ref: ${{ github.event.pull_request.head.sha }}
       - name: "Run JasperGold FPV"
         run: |
-          nix build '.#gcd.jg-fpv' --impure && cat result/report.txt && $(exit $(cat result/failed_num))
+          nix build \
+            --override-input chisel-nix "github:chipsalliance/chisel-nix/${{ github.head_ref || github.ref_name }}" \
+            --impure \
+            '.#gcd.jg-fpv' --impure \
+          && cat result/report.txt && $(exit $(cat result/failed_num))
