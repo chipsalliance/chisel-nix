@@ -1,8 +1,10 @@
 {
   description = "Chisel Flakes";
 
-  outputs = { self }: {
+  inputs.mill-ivy-fetcher.url = "github:Avimitin/mill-ivy-fetcher";
+
+  outputs = { self, mill-ivy-fetcher }: {
     templates = import ./templates;
-    overlays.mill-flows = import ./overlays/mill-flows.nix;
+    overlays.mill-flows = mill-ivy-fetcher.overlays.default;
   };
 }
