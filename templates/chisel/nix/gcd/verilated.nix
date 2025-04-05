@@ -25,7 +25,6 @@ in stdenv.mkDerivation {
     runHook preBuild
 
     echo "[nix] running verilator"
-    echo `ls`
     verilator \
       ${lib.optionalString dpi-lib.enable-trace "--trace-fst"} \
       --timing \

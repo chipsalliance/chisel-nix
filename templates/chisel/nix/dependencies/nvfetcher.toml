@@ -2,3 +2,8 @@
 src.git = "https://github.com/chipsalliance/chisel"
 src.branch = "main"
 fetch.github = "chipsalliance/chisel"
+
+[zaozi]
+src.git = "https://github.com/sequencer/zaozi"
+src.branch = "master"
+fetch.github = "sequencer/zaozi"
