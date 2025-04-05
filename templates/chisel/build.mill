@@ -12,7 +12,7 @@ import mill.util.Jvm
 import coursier.maven.MavenRepository
 
 object deps {
-  val scalaVer = "2.13.15"
+  val scalaVer = "2.13.16"
   val mainargs = ivy"com.lihaoyi::mainargs:0.5.0"
   val oslib = ivy"com.lihaoyi::os-lib:0.9.1"
   val upickle = ivy"com.lihaoyi::upickle:3.3.1"
@@ -34,8 +34,8 @@ object elaborator extends Elaborator
 trait Elaborator extends common.ElaboratorModule with ScalafmtModule {
   def scalaVersion = Task(deps.scalaVer)
 
-  def circtInstallPath =
-    Task.Input(PathRef(os.Path(T.ctx().env("CIRCT_INSTALL_PATH"))))
+  def mlirInstallPath = Task.Input(os.Path(Task.env.getOrElse("MLIR_INSTALL_PATH", "MLIR_INSTALL_PATH not found")))
+  def circtInstallPath = Task.Input(os.Path(Task.env.getOrElse("CIRCT_INSTALL_PATH", "CIRCT_INSTALL_PATH not found")))
 
   def generators = Seq(gcd)
 
