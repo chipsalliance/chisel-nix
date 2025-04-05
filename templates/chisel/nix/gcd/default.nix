@@ -10,6 +10,8 @@ let
   dpiLibName = "gcdemu";
 in
 {
+  dependencies = scope.callPackage ../dependencies { };
+
   # RTL
   gcd-compiled = scope.callPackage ./gcd.nix { target = designTarget; };
   elaborate = scope.callPackage ./elaborate.nix {
