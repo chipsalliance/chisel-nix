@@ -3,23 +3,30 @@
 
 { lib
 , stdenv
-, generateIvyCache
 , makeWrapper
+,writeShellApplication
 , jdk21
 , git
 
   # chisel deps
-, mill-dependencies
 , mill
 , espresso
-, circt-full
+,mlir-install
+,circt-install
 , jextract-21
 , add-determinism
+
+, dependencies
+, mill-ivy-fetcher
+, mill-ivy-env-shell-hook
+,ivy-gather
 
 , target
 }:
 
 let
+  gcdMillDeps = ivy-gather ../dependencies/locks/gcd-lock.nix;
+
   self = stdenv.mkDerivation rec {
     name = "gcd";
 
@@ -35,33 +42,50 @@ let
           ./../../elaborator
         ];
       };
+      
+    buildInputs = with dependencies; [
+      ivy-chisel.setupHook
+      gcdMillDeps
+    ];
 
-    passthru = {
-      millDeps = generateIvyCache {
-        inherit name src;
-        extraBuildInputs = with mill-dependencies; [ chisel.setupHook ];
-        hash = "sha256-GqN7l53MQHyhxbJ93XgnpdX0L2Bf5iDp8pDAnTyrz9s=";
-      };
-
-      inherit target;
-      inherit env;
-    };
-
-    nativeBuildInputs = with mill-dependencies; [
+    nativeBuildInputs = with dependencies; [
       makeWrapper
 
       mill
-      circt-full
+      circt-install
       jextract-21
       add-determinism
       espresso
       git
+    ];
 
-      chisel.setupHook
-    ] ++ passthru.millDeps.cache.ivyDepsList;
+    passthru = {
+      bump = writeShellApplication {
+      name = "bump-gcd-mill-lock";
+      runtimeInputs = [
+        mill
+        mill-ivy-fetcher
+      ];
+      text = ''
+        ivyLocal="${dependencies.ivyLocalRepo}"
+        export JAVA_TOOL_OPTIONS="''${JAVA_TOOL_OPTIONS:-} -Dcoursier.ivy.home=$ivyLocal -Divy.home=$ivyLocal"
+
+        mif run -p "${src}" -o ./nix/dependencies/locks/gcd-lock.nix "$@"
+      '';
+    };
+      inherit target;
+      inherit env;
+    };
+
+    shellHook = ''
+      ${mill-ivy-env-shell-hook}
+
+      mill -i mill.bsp.BSP/install
+    '';
 
     env = {
-      CIRCT_INSTALL_PATH = circt-full;
+      CIRCT_INSTALL_PATH = circt-install;
+      MLIR_INSTALL_PATH = mlir-install;
       JEXTRACT_INSTALL_PATH = jextract-21;
     };
 
@@ -82,7 +106,7 @@ let
 
       mkdir -p $elaborator/bin
       makeWrapper ${jdk21}/bin/java $elaborator/bin/elaborator \
-        --add-flags "--enable-preview -Djava.library.path=${circt-full}/lib -cp $out/share/java/elaborator.jar ${mainClass}"
+        --add-flags "--enable-preview -Djava.library.path=${mlir-install}/lib:${circt-install}/lib -cp $out/share/java/elaborator.jar ${mainClass}"
     '';
   };
 in
