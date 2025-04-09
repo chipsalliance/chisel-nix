@@ -1,14 +1,15 @@
 # SPDX-License-Identifier: Apache-2.0
 # SPDX-FileCopyrightText: 2024 Jiuyang Liu <liu@jiuyang.me>
 
-{ lib
-, bash
-, stdenv
-, rtl
-, dpi-lib
-, vcs-fhs-env
-, runCommand
-, enableCover ? true
+{
+  lib,
+  bash,
+  stdenv,
+  rtl,
+  dpi-lib,
+  vcs-fhs-env,
+  runCommand,
+  enableCover ? true,
 }:
 
 let
@@ -40,17 +41,13 @@ stdenv.mkDerivation (finalAttr: {
       -full64 \
       -timescale=1ns/1ps \
       -P $VERDI_HOME/share/PLI/VCS/LINUX64/novas.tab $VERDI_HOME/share/PLI/VCS/LINUX64/pli.a \
-      ${
-        lib.optionalString dpi-lib.enable-trace ''
-          -debug_access+pp+dmptf+thread \
-          -kdb=common_elab,hgldd_all \
-          -assert enable_diag ''
-      } \
-      ${
-        lib.optionalString enableCover ''
-          -cm line+cond+fsm+tgl+branch+assert \
-          -cm_dir ${coverageName} ''
-      } \
+      ${lib.optionalString dpi-lib.enable-trace ''
+        -debug_access+pp+dmptf+thread \
+        -kdb=common_elab,hgldd_all \
+        -assert enable_diag ''} \
+      ${lib.optionalString enableCover ''
+        -cm line+cond+fsm+tgl+branch+assert \
+        -cm_dir ${coverageName} ''} \
       -file filelist.f \
       ${dpi-lib}/lib/${dpi-lib.libOutName} \
       -o ${binName}
@@ -86,10 +83,7 @@ stdenv.mkDerivation (finalAttr: {
     cp ${binName} $out/lib
     cp -r ${binName}.daidir $out/lib
 
-    ${
-      lib.optionalString enableCover ''
-      cp -r ${coverageName} $out/lib''
-    } \
+    ${lib.optionalString enableCover ''cp -r ${coverageName} $out/lib''} \
 
     substitute ${./scripts/vcs-wrapper.sh} $out/bin/${binName} \
       --subst-var-by lib "$out/lib" \

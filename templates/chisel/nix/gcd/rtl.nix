@@ -1,18 +1,19 @@
 # SPDX-License-Identifier: Apache-2.0
 # SPDX-FileCopyrightText: 2024 Jiuyang Liu <liu@jiuyang.me>
 
-{ lib
-, stdenvNoCC
-, circt
-, mlirbc
-, mfcArgs ? [
+{
+  lib,
+  stdenvNoCC,
+  circt,
+  mlirbc,
+  mfcArgs ? [
     "-O=release"
     "--split-verilog"
     "--preserve-values=all"
     "--lowering-options=verifLabels,omitVersionComment"
     "--strip-debug-info"
-  ]
-, enable-layers ? [ ]
+  ],
+  enable-layers ? [ ],
 }:
 let
   processLayer = lib.map (str: "./" + lib.replaceStrings [ "." ] [ "/" ] (lib.toLower str));
@@ -30,14 +31,10 @@ stdenvNoCC.mkDerivation {
   buildCommand = ''
     mkdir -p $out
 
-    firtool ${mlirbc}/${mlirbc.name}-lowered.mlirbc -o $out ${
-      lib.escapeShellArgs mfcArgs
-    }
+    firtool ${mlirbc}/${mlirbc.name}-lowered.mlirbc -o $out ${lib.escapeShellArgs mfcArgs}
 
     pushd $out
-    find . ${
-      lib.concatStringsSep " " enableLayersDirs
-    } -maxdepth 1 -name "*.sv" -type f -print > ./filelist.f
+    find . ${lib.concatStringsSep " " enableLayersDirs} -maxdepth 1 -name "*.sv" -type f -print > ./filelist.f
     popd
   '';
 }

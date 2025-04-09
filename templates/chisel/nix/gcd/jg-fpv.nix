@@ -1,9 +1,10 @@
 # SPDX-License-Identifier: Apache-2.0
 # SPDX-FileCopyrightText: 2024 Jiuyang Liu <liu@jiuyang.me>
 
-{ stdenvNoCC
-, rtl
-, cds-fhs-env
+{
+  stdenvNoCC,
+  rtl,
+  cds-fhs-env,
 }:
 
 stdenvNoCC.mkDerivation {
@@ -33,15 +34,15 @@ stdenvNoCC.mkDerivation {
     echo "[nix] running Jasper"
     fhsBash=${cds-fhs-env}/bin/cds-fhs-env
     "$fhsBash" -c "jg -batch ${./scripts/FPV.tcl}"
-    
+
     runHook postBuild
   '';
 
   installPhase = ''
     runHook preInstall
-    
+
     mkdir -p $out
-    
+
     cp report.txt $out
     cp failed_num $out
     cp -r jgproject $out
