@@ -12,37 +12,37 @@ import mill.util.Jvm
 import coursier.maven.MavenRepository
 
 object deps {
-  val scalaVer = "2.13.16"
-  val mainargs = ivy"com.lihaoyi::mainargs:0.5.0"
-  val oslib = ivy"com.lihaoyi::os-lib:0.9.1"
-  val upickle = ivy"com.lihaoyi::upickle:3.3.1"
-  val chisel = ivy"org.chipsalliance::chisel::0.0.0+0-no-vcs-SNAPSHOT"
+  val scalaVer     = "2.13.16"
+  val mainargs     = ivy"com.lihaoyi::mainargs:0.5.0"
+  val oslib        = ivy"com.lihaoyi::os-lib:0.9.1"
+  val upickle      = ivy"com.lihaoyi::upickle:3.3.1"
+  val chisel       = ivy"org.chipsalliance::chisel::0.0.0+0-no-vcs-SNAPSHOT"
   val chiselPlugin = ivy"org.chipsalliance:chisel-plugin_${scalaVer}:0.0.0+0-no-vcs-SNAPSHOT"
 }
 
 object gcd extends GCD
-trait GCD extends common.HasChisel with ScalafmtModule {
+trait GCD  extends common.HasChisel with ScalafmtModule {
   def scalaVersion = Task(deps.scalaVer)
 
-  def chiselModule = None
+  def chiselModule    = None
   def chiselPluginJar = Task(None)
   def chiselPluginIvy = Some(deps.chiselPlugin)
-  def chiselIvy = Some(deps.chisel)
+  def chiselIvy       = Some(deps.chisel)
 }
 
 object elaborator extends Elaborator
-trait Elaborator extends common.ElaboratorModule with ScalafmtModule {
+trait Elaborator  extends common.ElaboratorModule with ScalafmtModule {
   def scalaVersion = Task(deps.scalaVer)
 
-  def mlirInstallPath = Task.Input(os.Path(Task.env.getOrElse("MLIR_INSTALL_PATH", "MLIR_INSTALL_PATH not found")))
+  def mlirInstallPath  = Task.Input(os.Path(Task.env.getOrElse("MLIR_INSTALL_PATH", "MLIR_INSTALL_PATH not found")))
   def circtInstallPath = Task.Input(os.Path(Task.env.getOrElse("CIRCT_INSTALL_PATH", "CIRCT_INSTALL_PATH not found")))
 
   def generators = Seq(gcd)
 
   def mainargsIvy = deps.mainargs
 
-  def chiselModule = None
+  def chiselModule    = None
   def chiselPluginJar = Task(None)
   def chiselPluginIvy = Some(deps.chiselPlugin)
-  def chiselIvy = Some(deps.chisel)
+  def chiselIvy       = Some(deps.chisel)
 }

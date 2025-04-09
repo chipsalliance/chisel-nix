@@ -1,27 +1,28 @@
 # SPDX-License-Identifier: Apache-2.0
 # SPDX-FileCopyrightText: 2024 Jiuyang Liu <liu@jiuyang.me>
 
-{ lib
-, stdenv
-, makeWrapper
-,writeShellApplication
-, jdk21
-, git
+{
+  lib,
+  stdenv,
+  makeWrapper,
+  writeShellApplication,
+  jdk21,
+  git,
 
   # chisel deps
-, mill
-, espresso
-,mlir-install
-,circt-install
-, jextract-21
-, add-determinism
+  mill,
+  espresso,
+  mlir-install,
+  circt-install,
+  jextract-21,
+  add-determinism,
 
-, dependencies
-, mill-ivy-fetcher
-, mill-ivy-env-shell-hook
-,ivy-gather
+  dependencies,
+  mill-ivy-fetcher,
+  mill-ivy-env-shell-hook,
+  ivy-gather,
 
-, target
+  target,
 }:
 
 let
@@ -32,7 +33,8 @@ let
 
     mainClass = "org.chipsalliance.gcd.elaborator.${target}Main";
 
-    src = with lib.fileset;
+    src =
+      with lib.fileset;
       toSource {
         root = ./../..;
         fileset = unions [
@@ -42,7 +44,7 @@ let
           ./../../elaborator
         ];
       };
-      
+
     buildInputs = with dependencies; [
       ivy-chisel.setupHook
       gcdMillDeps
@@ -61,18 +63,18 @@ let
 
     passthru = {
       bump = writeShellApplication {
-      name = "bump-gcd-mill-lock";
-      runtimeInputs = [
-        mill
-        mill-ivy-fetcher
-      ];
-      text = ''
-        ivyLocal="${dependencies.ivyLocalRepo}"
-        export JAVA_TOOL_OPTIONS="''${JAVA_TOOL_OPTIONS:-} -Dcoursier.ivy.home=$ivyLocal -Divy.home=$ivyLocal"
+        name = "bump-gcd-mill-lock";
+        runtimeInputs = [
+          mill
+          mill-ivy-fetcher
+        ];
+        text = ''
+          ivyLocal="${dependencies.ivyLocalRepo}"
+          export JAVA_TOOL_OPTIONS="''${JAVA_TOOL_OPTIONS:-} -Dcoursier.ivy.home=$ivyLocal -Divy.home=$ivyLocal"
 
-        mif run -p "${src}" -o ./nix/dependencies/locks/gcd-lock.nix "$@"
-      '';
-    };
+          mif run -p "${src}" -o ./nix/dependencies/locks/gcd-lock.nix "$@"
+        '';
+      };
       inherit target;
       inherit env;
     };
@@ -89,7 +91,10 @@ let
       JEXTRACT_INSTALL_PATH = jextract-21;
     };
 
-    outputs = [ "out" "elaborator" ];
+    outputs = [
+      "out"
+      "elaborator"
+    ];
 
     meta.mainProgram = "elaborator";
 

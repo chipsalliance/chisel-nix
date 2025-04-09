@@ -1,7 +1,11 @@
 # SPDX-License-Identifier: Apache-2.0
 # SPDX-FileCopyrightText: 2024 Jiuyang Liu <liu@jiuyang.me>
 
-{ stdenvNoCC, circt, elaborate }:
+{
+  stdenvNoCC,
+  circt,
+  elaborate,
+}:
 
 stdenvNoCC.mkDerivation {
   name = "${elaborate.name}-mlirbc";
