@@ -7,6 +7,7 @@
   rtl,
   verilator,
   zlib,
+  python3,
   dpi-lib,
   thread-num ? 8,
 }:
@@ -18,11 +19,14 @@ stdenv.mkDerivation {
 
   src = rtl;
 
-  nativeBuildInputs = [ verilator ];
+  nativeBuildInputs = [
+    verilator
+    python3
+  ];
 
   # zlib is required for Rust to link against?
   # IIRC: zlib is required for
-  propagatedBuildInputs = [ zlib ];
+  propagatedBuildInputs = lib.optionals dpi-lib.enable-trace [ zlib ];
 
   passthru = {
     inherit dpi-lib;
