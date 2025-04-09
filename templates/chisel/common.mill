@@ -39,18 +39,18 @@ trait HasChisel extends ScalaModule {
 }
 
 trait ElaboratorModule extends ScalaModule with HasChisel {
-  def generators:            Seq[ScalaModule]
-  def mlirInstallPath:      T[os.Path]
-  def circtInstallPath:      T[os.Path]
+  def generators:       Seq[ScalaModule]
+  def mlirInstallPath:  T[os.Path]
+  def circtInstallPath: T[os.Path]
   override def moduleDeps = super.moduleDeps ++ generators
   def mainargsIvy: Dep
-  override def ivyDeps = Task(super.ivyDeps() ++ Seq(mainargsIvy))
+  override def ivyDeps      = Task(super.ivyDeps() ++ Seq(mainargsIvy))
   override def javacOptions = Task(super.javacOptions() ++ Seq("--enable-preview", "--release", "21"))
-  def libraryPaths = Task(Seq(mlirInstallPath() / "lib", circtInstallPath() / "lib").map(PathRef(_)))
+  def libraryPaths          = Task(Seq(mlirInstallPath() / "lib", circtInstallPath() / "lib").map(PathRef(_)))
   override def forkArgs: T[Seq[String]] = Task(
     super.forkArgs() ++ Seq(
       "--enable-native-access=ALL-UNNAMED",
-      "--enable-preview",
+      "--enable-preview"
     )
   )
 }

@@ -1,16 +1,17 @@
-{ lib,
-callPackage
-, newScope
-,writeShellApplication
-,runCommand
-, publishMillJar
-, git
-,mill
-, mill-ivy-fetcher
-,mlir-install
-,circt-install
-, jextract-21
-, ...
+{
+  lib,
+  callPackage,
+  newScope,
+  writeShellApplication,
+  runCommand,
+  publishMillJar,
+  git,
+  mill,
+  mill-ivy-fetcher,
+  mlir-install,
+  circt-install,
+  jextract-21,
+  ...
 }:
 let
   dependencies = callPackage ./_sources/generated.nix { };
@@ -45,50 +46,51 @@ lib.makeScope newScope (scope: {
     };
   };
 
-  ivy-omlib =
-    publishMillJar {
-      name = "omlib-snapshot";
-      src = dependencies.zaozi.src;
+  ivy-omlib = publishMillJar {
+    name = "omlib-snapshot";
+    src = dependencies.zaozi.src;
 
-      publishTargets = [
-        "mlirlib"
-        "circtlib"
-        "omlib"
-      ];
+    publishTargets = [
+      "mlirlib"
+      "circtlib"
+      "omlib"
+    ];
 
-      env = {
-        CIRCT_INSTALL_PATH = circt-install;
-        MLIR_INSTALL_PATH = mlir-install;
-        JEXTRACT_INSTALL_PATH = jextract-21;
-      };
-
-      lockFile = ./locks/zaozi-lock.nix;
-
-      passthru.bump = writeShellApplication {
-        name = "bump-zaozi-mill-lock";
-
-        runtimeInputs = [
-          mill
-          mill-ivy-fetcher
-        ];
-
-        text = ''
-          mif run -p "${dependencies.zaozi.src}" -o ./nix/dependencies/locks/zaozi-lock.nix "$@"
-        '';
-      };
-
-      nativeBuildInputs = [ git ];
+    env = {
+      CIRCT_INSTALL_PATH = circt-install;
+      MLIR_INSTALL_PATH = mlir-install;
+      JEXTRACT_INSTALL_PATH = jextract-21;
     };
 
-  ivyLocalRepo = runCommand "build-coursier-env"
-    {
-      buildInputs = with scope; [
-        ivy-chisel.setupHook
-        ivy-omlib.setupHook
+    lockFile = ./locks/zaozi-lock.nix;
+
+    passthru.bump = writeShellApplication {
+      name = "bump-zaozi-mill-lock";
+
+      runtimeInputs = [
+        mill
+        mill-ivy-fetcher
       ];
-    } ''
-    runHook preUnpack
-    runHook postUnpack
-    cp -r "$NIX_COURSIER_DIR" "$out"
-  '';
+
+      text = ''
+        mif run -p "${dependencies.zaozi.src}" -o ./nix/dependencies/locks/zaozi-lock.nix "$@"
+      '';
+    };
+
+    nativeBuildInputs = [ git ];
+  };
+
+  ivyLocalRepo =
+    runCommand "build-coursier-env"
+      {
+        buildInputs = with scope; [
+          ivy-chisel.setupHook
+          ivy-omlib.setupHook
+        ];
+      }
+      ''
+        runHook preUnpack
+        runHook postUnpack
+        cp -r "$NIX_COURSIER_DIR" "$out"
+      '';
 })

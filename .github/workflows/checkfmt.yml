@@ -29,19 +29,7 @@ jobs:
       - uses: actions/checkout@v4
         with:
           ref: ${{ github.event.pull_request.head.sha }}
-      - name: "Check Scala format"
+      - name: "Check format"
         if: "!cancelled()"
         run: |
-          echo "$JAVA_OPTS" | tr ' ' '\n' > mill-java-opts
-          export MILL_JVM_OPTS_PATH=$PWD/mill-java-opts
-          nix develop -c bash -c 'mill -i gcd.checkFormat && mill -i elaborator.checkFormat'
-      - name: "Check Rust format"
-        if: "!cancelled()"
-        run: |
-          cd gcdemu
-          nix develop -c cargo fmt --check
-          cd ..
-      - name: "Check nix format"
-        if: "!cancelled()"
-        run: |
-          nix fmt -- --check nix flake.nix
+          nix fmt -- --fail-on-change

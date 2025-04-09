@@ -1,9 +1,19 @@
 # SPDX-License-Identifier: Apache-2.0
 # SPDX-FileCopyrightText: 2024 Jiuyang Liu <liu@jiuyang.me>
 
-{ lib, stdenv, rtl, verilator, zlib, dpi-lib, thread-num ? 8 }:
-let vName = "V${rtl.target}";
-in stdenv.mkDerivation {
+{
+  lib,
+  stdenv,
+  rtl,
+  verilator,
+  zlib,
+  dpi-lib,
+  thread-num ? 8,
+}:
+let
+  vName = "V${rtl.target}";
+in
+stdenv.mkDerivation {
   name = "verilated";
 
   src = rtl;
@@ -11,7 +21,7 @@ in stdenv.mkDerivation {
   nativeBuildInputs = [ verilator ];
 
   # zlib is required for Rust to link against?
-  # IIRC: zlib is required for 
+  # IIRC: zlib is required for
   propagatedBuildInputs = [ zlib ];
 
   passthru = {
