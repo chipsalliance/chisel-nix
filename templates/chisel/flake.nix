@@ -35,8 +35,9 @@
           # TODO: Do not depend on overlay of zaozi in favor of importing its outputs explicitly to avoid namespace pollution.
           overlays = [
             zaozi.overlays.default
+            mill-ivy-fetcher.overlays.default
+            (final: prev: { mill-ivy-fetcher = mill-ivy-fetcher.packages.${system}.default; })
             overlay
-            (final: prev: mill-ivy-fetcher.packages.${system})
           ];
           inherit system;
         };

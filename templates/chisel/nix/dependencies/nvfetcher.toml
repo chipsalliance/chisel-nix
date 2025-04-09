@@ -1,7 +1,7 @@
 [chisel]
-src.git = "https://github.com/chipsalliance/chisel"
-src.branch = "main"
-fetch.github = "chipsalliance/chisel"
+src.git = "https://github.com/unlsycn/chisel"
+src.branch = "mill-bump-1210"
+fetch.github = "unlsycn/chisel"
 
 [zaozi]
 src.git = "https://github.com/sequencer/zaozi"
