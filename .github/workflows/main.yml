@@ -109,5 +109,5 @@ jobs:
           nix build \
             --override-input chisel-nix "github:chipsalliance/chisel-nix/${{ github.head_ref || github.ref_name }}" \
             --impure \
-            '.#gcd.jg-fpv' --impure \
+            '.#gcd.jg-fpv' \
           && cat result/report.txt && $(exit $(cat result/failed_num))
