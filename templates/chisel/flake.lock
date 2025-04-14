@@ -303,11 +303,11 @@
         "nixpkgs4circt": "nixpkgs4circt"
       },
       "locked": {
-        "lastModified": 1743238625,
-        "narHash": "sha256-oOG2L0SV6JMVzaCvdovtmJbEUsypxr2wcajN2feltIY=",
+        "lastModified": 1744618990,
+        "narHash": "sha256-U9wZ3sBJbsdjwfunz7rN3YPDKefvRrkdrKGuAXs6WjQ=",
         "owner": "sequencer",
         "repo": "zaozi",
-        "rev": "57ec13b25347f82569faae4ec7a3c62582f945b5",
+        "rev": "5770967e3301547c547ed2b7bbc7c181f95524bf",
         "type": "github"
       },
       "original": {
