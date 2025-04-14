@@ -59,7 +59,10 @@
               enable = true;
               includes = [ "*.mill" ];
             };
-            programs.nixfmt.enable = true;
+            programs.nixfmt = {
+              enable = true;
+              excludes = [ "*/generated.nix" ];
+            };
             programs.rustfmt.enable = true;
           };
 
