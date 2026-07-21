@@ -2,12 +2,15 @@
   lib,
   callPackage,
   newScope,
+  stdenvNoCC,
+  symlinkJoin,
   writeShellApplication,
-  runCommand,
-  publishMillJar,
+  addDeterminismHook,
+  coreutils,
   git,
   mill,
-  mill-ivy-fetcher,
+  mif,
+  mkMavenRepository,
   mlir-install,
   circt-install,
   jextract-21,
@@ -15,13 +18,72 @@
 }:
 let
   dependencies = callPackage ./_sources/generated.nix { };
+
+  publishLocalIvy =
+    {
+      name,
+      src,
+      lockFile,
+      publishTargets,
+      nativeBuildInputs ? [ ],
+      env ? { },
+      passthru ? { },
+    }:
+    let
+      mavenRepository = mkMavenRepository {
+        inherit lockFile;
+        name = "${name}-maven-repository";
+      };
+    in
+    stdenvNoCC.mkDerivation {
+      name = "${name}-mill-local-ivy";
+
+      inherit src env;
+
+      buildInputs = [ mavenRepository ];
+
+      nativeBuildInputs = [
+        addDeterminismHook
+        mill
+      ] ++ nativeBuildInputs;
+
+      buildPhase = ''
+        runHook preBuild
+
+        mkdir -p "$out/local"
+
+        ${lib.concatMapStringsSep "\n" (
+          target: "mill -i '${target}.publishLocal' --localIvyRepo \"$out/local\""
+        ) publishTargets}
+
+        runHook postBuild
+      '';
+
+      fixupPhase = ''
+        runHook preFixup
+
+        # Chisel's generated Scaladoc JARs are not reproducible yet.
+        # https://github.com/chipsalliance/chisel/issues/4666
+        find "$out/local" -wholename '*/docs/*.jar' -type f -delete
+
+        runHook postFixup
+      '';
+
+      dontInstall = true;
+      dontPatchELF = true;
+      dontShrink = true;
+
+      passthru = {
+        inherit mavenRepository;
+      } // passthru;
+    };
 in
 lib.makeScope newScope (scope: {
-  ivy-chisel = publishMillJar {
+  ivy-chisel = publishLocalIvy {
     name = "chisel-snapshot";
     src = dependencies.chisel.src;
 
-    lockFile = ./locks/chisel-lock.nix;
+    lockFile = ./locks/chisel-lock.json;
 
     publishTargets = [
       "unipublish"
@@ -36,17 +98,45 @@ lib.makeScope newScope (scope: {
       name = "bump-chisel-mill-lock";
 
       runtimeInputs = [
+        coreutils
+        git
         mill
-        mill-ivy-fetcher
+        mif
       ];
 
       text = ''
-        mif run -p "${dependencies.chisel.src}" -o ./nix/dependencies/locks/chisel-lock.nix "$@"
+        workdir="$(mktemp -d)"
+        cleanup() {
+          rm -rf "$workdir"
+        }
+        trap cleanup EXIT
+
+        cp -R --no-preserve=mode,ownership "${dependencies.chisel.src}/." "$workdir/"
+
+        mif archive \
+          -p "$workdir" \
+          --lock ./nix/dependencies/locks/chisel-lock.json \
+          --fresh \
+          -- mill -i __.prepareOffline
+
+        rm -rf "$workdir/out"
+
+        mif archive \
+          -p "$workdir" \
+          --lock ./nix/dependencies/locks/chisel-lock.json \
+          -- mill -i __.scalaCompilerClasspath
+
+        rm -rf "$workdir/out"
+
+        mif archive \
+          -p "$workdir" \
+          --lock ./nix/dependencies/locks/chisel-lock.json \
+          -- mill -i __.scalaDocClasspath
       '';
     };
   };
 
-  ivy-omlib = publishMillJar {
+  ivy-omlib = publishLocalIvy {
     name = "omlib-snapshot";
     src = dependencies.zaozi.src;
 
@@ -62,35 +152,57 @@ lib.makeScope newScope (scope: {
       JEXTRACT_INSTALL_PATH = jextract-21;
     };
 
-    lockFile = ./locks/zaozi-lock.nix;
+    lockFile = ./locks/zaozi-lock.json;
 
     passthru.bump = writeShellApplication {
       name = "bump-zaozi-mill-lock";
 
       runtimeInputs = [
+        coreutils
+        git
         mill
-        mill-ivy-fetcher
+        mif
       ];
 
       text = ''
-        mif run -p "${dependencies.zaozi.src}" -o ./nix/dependencies/locks/zaozi-lock.nix "$@"
+        workdir="$(mktemp -d)"
+        cleanup() {
+          rm -rf "$workdir"
+        }
+        trap cleanup EXIT
+
+        cp -R --no-preserve=mode,ownership "${dependencies.zaozi.src}/." "$workdir/"
+
+        mif archive \
+          -p "$workdir" \
+          --lock ./nix/dependencies/locks/zaozi-lock.json \
+          --fresh \
+          -- mill -i __.prepareOffline
+
+        rm -rf "$workdir/out"
+
+        mif archive \
+          -p "$workdir" \
+          --lock ./nix/dependencies/locks/zaozi-lock.json \
+          -- mill -i __.scalaCompilerClasspath
+
+        rm -rf "$workdir/out"
+
+        mif archive \
+          -p "$workdir" \
+          --lock ./nix/dependencies/locks/zaozi-lock.json \
+          -- mill -i __.scalaDocClasspath
       '';
     };
 
     nativeBuildInputs = [ git ];
   };
 
-  ivyLocalRepo =
-    runCommand "build-coursier-env"
-      {
-        buildInputs = with scope; [
-          ivy-chisel.setupHook
-          ivy-omlib.setupHook
-        ];
-      }
-      ''
-        runHook preUnpack
-        runHook postUnpack
-        cp -r "$NIX_COURSIER_DIR" "$out"
-      '';
+  ivyLocalRepo = symlinkJoin {
+    name = "chisel-local-ivy-repository";
+    paths = with scope; [
+      ivy-chisel
+      ivy-omlib
+    ];
+  };
 })

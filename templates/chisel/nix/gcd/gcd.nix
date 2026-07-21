@@ -6,6 +6,7 @@
   stdenv,
   makeWrapper,
   writeShellApplication,
+  coreutils,
   jdk21,
   git,
 
@@ -18,15 +19,27 @@
   add-determinism,
 
   dependencies,
-  mill-ivy-fetcher,
-  mill-ivy-env-shell-hook,
-  ivy-gather,
+  mif,
+  mkMavenRepository,
 
   target,
 }:
 
 let
-  gcdMillDeps = ivy-gather ../dependencies/locks/gcd-lock.nix;
+  gcdMavenRepository = mkMavenRepository {
+    lockFile = ../dependencies/locks/gcd-lock.json;
+    name = "gcd-maven-repository";
+  };
+
+  archiveMill = writeShellApplication {
+    name = "mill";
+    runtimeInputs = [ mill ];
+    text = ''
+      ivyHome="$PWD/.ivy2"
+      export JAVA_TOOL_OPTIONS="''${JAVA_TOOL_OPTIONS:-} -Dcoursier.ivy.home=$ivyHome -Divy.home=$ivyHome"
+      exec mill "$@"
+    '';
+  };
 
   self = stdenv.mkDerivation rec {
     name = "gcd";
@@ -45,10 +58,7 @@ let
         ];
       };
 
-    buildInputs = with dependencies; [
-      ivy-chisel.setupHook
-      gcdMillDeps
-    ];
+    buildInputs = [ gcdMavenRepository ];
 
     nativeBuildInputs = with dependencies; [
       makeWrapper
@@ -65,23 +75,42 @@ let
       bump = writeShellApplication {
         name = "bump-gcd-mill-lock";
         runtimeInputs = [
+          coreutils
           mill
-          mill-ivy-fetcher
+          mif
         ];
         text = ''
-          ivyLocal="${dependencies.ivyLocalRepo}"
-          export JAVA_TOOL_OPTIONS="''${JAVA_TOOL_OPTIONS:-} -Dcoursier.ivy.home=$ivyLocal -Divy.home=$ivyLocal"
+          workdir="$(mktemp -d)"
+          cleanup() {
+            rm -rf "$workdir"
+          }
+          trap cleanup EXIT
 
-          mif run -p "${src}" -o ./nix/dependencies/locks/gcd-lock.nix "$@"
+          cp -R --no-preserve=mode,ownership "${src}/." "$workdir/"
+          mkdir -p "$workdir/.ivy2"
+          cp -R --no-preserve=mode,ownership "${dependencies.ivyLocalRepo}/." "$workdir/.ivy2/"
+          ln -s "${archiveMill}/bin/mill" "$workdir/mill"
+
+          mif archive \
+            -p "$workdir" \
+            --lock ./nix/dependencies/locks/gcd-lock.json \
+            --fresh \
+            -- ./mill -i __.prepareOffline
+
+          rm -rf "$workdir/out"
+
+          mif archive \
+            -p "$workdir" \
+            --lock ./nix/dependencies/locks/gcd-lock.json \
+            -- ./mill -i __.scalaCompilerClasspath
         '';
       };
       inherit target;
       inherit env;
+      inherit gcdMavenRepository;
     };
 
     shellHook = ''
-      ${mill-ivy-env-shell-hook}
-
       mill -i mill.bsp.BSP/install
     '';
 
@@ -89,6 +118,8 @@ let
       CIRCT_INSTALL_PATH = circt-install;
       MLIR_INSTALL_PATH = mlir-install;
       JEXTRACT_INSTALL_PATH = jextract-21;
+      JAVA_TOOL_OPTIONS = "-Dcoursier.ivy.home=${dependencies.ivyLocalRepo} -Divy.home=${dependencies.ivyLocalRepo}";
+      COURSIER_REPOSITORIES = "ivy2Local|file://${gcdMavenRepository}";
     };
 
     outputs = [

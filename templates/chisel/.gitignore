@@ -6,6 +6,7 @@
 .vscode/
 .envrc
 .direnv/
+.mif/
 
 out/
 result*

@@ -47,6 +47,9 @@
             overlays = with inputs; [
               zaozi.overlays.default
               mill-ivy-fetcher.overlays.default
+              (_final: _prev: {
+                mif = mill-ivy-fetcher.packages.${system}.mif;
+              })
               overlay
             ];
           };
