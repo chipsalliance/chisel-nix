@@ -30,7 +30,9 @@ jobs:
       - name: Bump all mill deps
         run: |
           mkdir -p nix/dependencies/locks
-          printf '%s\n' "gcd.dependencies.ivy-chisel.bump" "gcd.dependencies.ivy-omlib.bump" "gcd.gcd-compiled.bump" | xargs -I% nix run ".#%" -j auto -- --force
+          nix run '.#gcd.dependencies.ivy-chisel.bump' -j auto
+          nix run '.#gcd.dependencies.ivy-omlib.bump' -j auto
+          nix run '.#gcd.gcd-compiled.bump' -j auto
       - name: Commit changes
         env:
           GH_TOKEN: ${{ secrets.CI_BUMP_TOKEN }}

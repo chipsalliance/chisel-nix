@@ -135,61 +135,19 @@ nix flake update
 To bump Chisel and other dependencies fetched by nvfetcher, run:
 
 ```bash
-cd nix/pkgs/dependencies
+cd nix/dependencies
 nix run '.#nvfetcher'
 ```
 
-To bump mill dependencies, run:
+To regenerate the Maven dependency locks, run these commands from the project root in order:
 
 ```bash
-nix build '.#gcd.gcd-compiled.millDeps' --rebuild
+nix run '.#gcd.dependencies.ivy-chisel.bump' -j auto
+nix run '.#gcd.dependencies.ivy-omlib.bump' -j auto
+nix run '.#gcd.gcd-compiled.bump' -j auto
 ```
 
-and Then update `millDepsHash` in `nix/pkgs/dependencies/default.nix` and `nix/gcd/gcd.nix`
-
-### Use the fetchMillDeps function
-
-Fetch project dependencies for later offline usage.
-
-The `fetchMillDeps` function accept three args: `name`, `src`, `millDepsHash`:
-
-* name: name of the mill dependencies derivation, suggest using `<module>-mill-deps` as suffix.
-* src: path to a directory that contains at least `build.mill` file for mill to obtain dependencies.
-* millDepsHash: same functionality as the `sha256`, `hash` attr in stdenv.mkDerivation. To obtain new hash for new dependencies, replace the old hash with empty string, and let nix figure the new hash.
-
-This derivation will read `$JAVA_OPTS` environment varialble, to set http proxy, you can export:
-
-```bash
-export JAVA_OPTS="-Dhttps.proxyHost=127.0.0.1 -Dhttps.proxyPort=1234"
-```
-
-The returning derivation have `setupHook` attribute to automatically setup dependencies path for mill.
-Add the attribute into `nativeBuildInputs`, and let nix run the hook.
-
-Example:
-
-```nix
-stdenv.mkDerivation rec {
-    # ...
-    passthru = {
-      millDeps = fetchMillDeps {
-        inherit name;
-        src = with lib.fileset;
-          toSource {
-            root = ./../..;
-            fileset = unions [ ./../../build.mill ./../../common.mill ];
-          };
-        buildInputs = with mill-dependencies; [ chisel.setupHook ];
-        millDepsHash = "sha256-NybS2AXRQtXkgHd5nH4Ltq3sxZr5aZ4VepiT79o1AWo=";
-      };
-    };
-    # ...
-    nativeBuildInputs = [
-        # ...
-        millDeps.setupHook
-    ];
-}
-```
+The first two locks are used to publish the local Chisel and OMLib snapshots. The GCD lock depends on those snapshots, so it must be generated last. The disposable Maven relay cache is stored under `.mif/` and is ignored by Git.
 
 ## License
 
