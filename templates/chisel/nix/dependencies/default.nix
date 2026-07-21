@@ -50,21 +50,13 @@ let
       buildPhase = ''
         runHook preBuild
 
-        localIvyHome="$NIX_BUILD_TOP/local-ivy-home"
-        export JAVA_TOOL_OPTIONS="''${JAVA_TOOL_OPTIONS:-} -Dcoursier.ivy.home=$localIvyHome -Divy.home=$localIvyHome"
+        mkdir -p "$out/local"
 
-        ${lib.concatMapStringsSep "\n" (target: "mill -i '${target}.publishLocal'") publishTargets}
+        ${lib.concatMapStringsSep "\n" (
+          target: "mill -i '${target}.publishLocal' --localIvyRepo \"$out/local\""
+        ) publishTargets}
 
         runHook postBuild
-      '';
-
-      installPhase = ''
-        runHook preInstall
-
-        mkdir -p "$out"
-        mv "$NIX_BUILD_TOP/local-ivy-home/local" "$out/local"
-
-        runHook postInstall
       '';
 
       fixupPhase = ''
@@ -77,6 +69,7 @@ let
         runHook postFixup
       '';
 
+      dontInstall = true;
       dontPatchELF = true;
       dontShrink = true;
 
